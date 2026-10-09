@@ -37,13 +37,8 @@
   <!-- FontAwesome v6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Socket.IO Client -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    if (typeof io === 'undefined') {
-      document.write('<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"><\/script>');
-    }
-  </script>
+  <!-- Socket.IO Client via CDN -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
   <!-- QRCode.js Oficial (Generador Autónomo de Códigos QR) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -722,7 +717,7 @@
   <!-- Contenedor de Toasts -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
-  <!-- Carga de Módulos MVC -->
+  <!-- Carga de Módulos MVC (Orden estricto de ejecución) -->
   <script src="js/config.js?v=3.0"></script>
   <script src="js/models/TicketModel.js?v=3.0"></script>
   <script src="js/views/TicketView.js?v=3.0"></script>
