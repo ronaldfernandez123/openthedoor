@@ -9,7 +9,7 @@ const RAILWAY_BACKEND_URL = "https://TU-PROYECTO.up.railway.app";
 
 // Detecta si estás probando localmente o en producción (Vercel)
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const SOCKET_SERVER_URL = isLocal ? 'http://localhost:3000' : RAILWAY_BACKEND_URL;
+const SOCKET_SERVER_URL = isLocal ? 'openthedoor-production.up.railway.app' : RAILWAY_BACKEND_URL;
 
 // Inicialización global de Socket.IO
 const socket = io(SOCKET_SERVER_URL, {
