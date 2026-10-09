@@ -5,7 +5,7 @@
 const STORAGE_KEY = 'openthedoor_v2_data';
 
 // ⚠️ REEMPLAZA ESTA URL POR TU DOMINIO REAL DE RAILWAY
-const RAILWAY_BACKEND_URL = "https://TU-PROYECTO.up.railway.app";
+const RAILWAY_BACKEND_URL = "https://openthedoor-production.up.railway.app";
 
 // Detecta si estás probando localmente o en producción (Vercel)
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
