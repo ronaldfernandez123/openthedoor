@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenTheDoor - Gran Gala & Concierto Exclusivo (Reserva de Mesas en Vivo)</title>
+  
+  <!-- SEO & Meta Tags -->
+  <meta name="description" content="OpenTheDoor - Plataforma de boletería digital con reserva de mesas y puestos circulares en tiempo real, emisión de boletos con códigos QR y control de acceso verificado por cámara.">
+  <meta name="keywords" content="boletería digital, tickets qr, eventos, conciertos, mesas circulares, reserva en vivo, openthedoor, socket.io">
+  <meta name="author" content="OpenTheDoor">
+  <meta name="theme-color" content="#4f46e5">
+
+  <!-- Favicon SVG -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234f46e5'><path d='M4 4h16a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V6a2 2 0 0 1 2-2zm0 2v1.5a4 4 0 0 1 0 7V18h16v-3.5a4 4 0 0 1 0-7V6H4zm6 3a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1z'/></svg>">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome v6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Socket.IO Client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    if (typeof io === 'undefined') {
+      document.write('<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"><\/script>');
+    }
+  </script>
+
+  <!-- QRCode.js Oficial (Generador Autónomo de Códigos QR) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- HTML5-QRCode (Lector y Escáner de Cámara QR) -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <!-- html2pdf.js (Generador de Comprobante PDF Oficial) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Estilos Personalizados & Mesas Circulares -->
+  <link rel="stylesheet" href="css/styles.css?v=3.0">
+</head>
+<body class="h-full text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-900 transition-colors">
+
+  <!-- ==================== HEADER PRINCIPAL (OPENTHEDOOR) ==================== -->
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-4">
+        
+        <!-- Brand / Logo -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="appController.handleNavigate('client')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-indigo-200 dark:shadow-none">
+            <i class="fa-solid fa-door-open text-xl -rotate-12"></i>
+          </div>
+          <div>
+            <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">openthedoor<span class="text-indigo-500">.</span></span>
+            <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-800">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1"></span> Live WebSockets
+            </span>
+          </div>
+        </div>
+
+        <!-- Acciones del Usuario & Navegación -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Toggle Dark / Light Theme -->
+          <button id="btnToggleTheme" onclick="appController.handleToggleTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm transition-all border border-slate-200 dark:border-slate-700" title="Cambiar Tema">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+
+          <!-- Grupo No Autenticado -->
+          <div id="auth-buttons-group" class="flex items-center gap-2">
+            <button onclick="appController.handleGooglePromptOrDemo()" class="px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2" title="Iniciar con Google">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span class="hidden sm:inline">Google</span>
+            </button>
+            <button onclick="appController.handleOpenAuthModal('login')" class="px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Iniciar Sesión
+            </button>
+            <button onclick="appController.handleOpenAuthModal('register')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 dark:shadow-none transition-all">
+              Registrarse
+            </button>
+            <button onclick="appController.handleOpenPortalModal('admin')" class="px-3 py-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-amber-400"></i> Portal Admin / Staff
+            </button>
+          </div>
+
+          <!-- Grupo Autenticado -->
+          <div id="user-info" class="hidden flex items-center gap-2">
+            <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <img id="user-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="w-7 h-7 rounded-full object-cover border border-indigo-400">
+              <span id="user-name" class="text-xs font-bold text-slate-800 dark:text-slate-200"></span>
+            </div>
+
+            <button id="btn-mis-boletas" onclick="appController.handleNavigate('my-tickets')" class="px-3.5 py-2 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 text-sky-700 dark:text-sky-300 rounded-xl text-xs font-bold border border-sky-200 dark:border-sky-800 transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-ticket"></i> Mis Boletas
+            </button>
+
+            <button id="btn-panel-admin" onclick="appController.handleNavigate('admin')" class="hidden px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-line"></i> Panel Admin
+            </button>
+
+            <button id="btn-scanner-admin" onclick="appController.handleNavigate('staff')" class="hidden px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5" title="Escanear entradas como Administrador (Acceso Total)">
+              <i class="fa-solid fa-camera"></i> Escáner Admin
+            </button>
+
+            <button id="btn-panel-staff" onclick="appController.handleNavigate('staff')" class="hidden px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-qrcode"></i> Módulo Escáner
+            </button>
+
+            <button onclick="appController.handleLogout()" class="px-3 py-2 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 text-rose-600 dark:text-rose-300 rounded-xl text-xs font-bold transition-all" title="Cerrar Sesión">
+              <i class="fa-solid fa-right-from-bracket"></i> Salir
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== VISTA 1: CLIENTE / MAPA DE MESAS CIRCULARES ==================== -->
+  <main id="view-client" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Hero / Información del Evento Único -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl text-white p-6 sm:p-8 mb-6 shadow-xl shadow-slate-900/10 border border-slate-800">
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+              <i class="fa-solid fa-star text-amber-400"></i> Evento de Gala Exclusivo
+            </span>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+              Aforo Total: 600 Puestos (60 Mesas Circulares)
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
+            Gran Gala & Concierto Exclusivo
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-2xl flex flex-wrap items-center gap-4 pt-1">
+            <span><i class="fa-regular fa-calendar-check text-indigo-400"></i> Sábado, 28 de Noviembre 2026 - 20:00 hs</span>
+            <span><i class="fa-solid fa-location-dot text-rose-400"></i> Gran Salón Real & Arena 360°, Bogotá</span>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-center">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Zona Diamond</div>
+            <div class="text-base font-extrabold text-indigo-300">$100.000 <span class="text-[10px]">COP</span></div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-center">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Zona Gold</div>
+            <div class="text-base font-extrabold text-amber-300">$70.000 <span class="text-[10px]">COP</span></div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-center">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Zona Silver</div>
+            <div class="text-base font-extrabold text-slate-200">$40.000 <span class="text-[10px]">COP</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layout: Panel Lateral de Carrito + Plano Central -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- Panel Lateral Izquierdo: Selección & Carrito -->
+      <div class="lg:col-span-4 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4 sticky top-24">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+          <h2 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-cart-shopping text-indigo-600 dark:text-indigo-400"></i> Tu Selección
+          </h2>
+          <span id="selected-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+            0
+          </span>
+        </div>
+
+        <!-- Temporizador de Reserva (Hold Timer - 5m) -->
+        <div id="timer-display" class="timer bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-2.5 rounded-xl text-xs font-bold text-center border border-slate-200 dark:border-slate-600 transition-all">
+          ⏱️ Tiempo de Reserva: 05:00
+        </div>
+
+        <!-- Lista de Sillas Seleccionadas -->
+        <div id="selected-list" class="min-h-[100px]">
+          <div class="p-6 text-center text-slate-400 dark:text-slate-500 space-y-2">
+            <i class="fa-solid fa-chair text-3xl opacity-40"></i>
+            <p class="text-xs font-semibold">Haz clic en los puestos verdes del mapa para seleccionar tus sillas o reservar mesas completas.</p>
+          </div>
+        </div>
+
+        <!-- Resumen de Pago -->
+        <div class="border-t border-slate-100 dark:border-slate-700 pt-3 space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Subtotal:</span>
+            <span class="font-mono font-bold">Impuestos y Servicios Incluidos</span>
+          </div>
+          <div class="flex items-center justify-between text-base">
+            <span class="font-extrabold text-slate-800 dark:text-slate-200">Total a Pagar:</span>
+            <span id="total-price" class="font-mono font-black text-xl text-indigo-600 dark:text-indigo-400">$0 COP</span>
+          </div>
+        </div>
+
+        <!-- Botón de Checkout -->
+        <button id="btn-checkout" onclick="appController.handleStartCheckout()" disabled class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-100 dark:shadow-none transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-receipt"></i> Generar Comprobante & Pagar
+        </button>
+      </div>
+
+      <!-- Área Central: Plano de Mesas Circulares & Escenario -->
+      <div class="lg:col-span-8 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-6">
+        
+        <!-- Escenario Principal -->
+        <div class="stage-banner p-3.5 text-center text-xs sm:text-sm font-black text-white rounded-2xl">
+          <i class="fa-solid fa-music mr-2"></i> ESCENARIO PRINCIPAL <i class="fa-solid fa-music ml-2"></i>
+        </div>
+
+        <!-- Leyenda de Estados en Tiempo Real -->
+        <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-bold py-2 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-200/60 dark:border-slate-700">
+          <span class="flex items-center"><i class="dot available"></i> Disponible</span>
+          <span class="flex items-center"><i class="dot selected"></i> Tu Selección</span>
+          <span class="flex items-center"><i class="dot locked"></i> Bloqueado (5 min)</span>
+          <span class="flex items-center"><i class="dot sold"></i> Vendido</span>
+        </div>
+
+        <!-- Acordeones / Secciones de Zonas -->
+        <div class="space-y-4">
+          
+          <!-- ZONA DIAMOND -->
+          <div class="zone-accordion border border-indigo-200 dark:border-indigo-900/60 rounded-2xl overflow-hidden shadow-sm">
+            <button type="button" id="zone-header-diamond" onclick="appController.handleToggleZone('diamond')" class="w-full px-5 py-4 bg-indigo-50/70 dark:bg-indigo-950/40 text-left flex items-center justify-between transition-colors cursor-pointer">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm font-black">
+                  💎
+                </span>
+                <div>
+                  <h3 class="font-black text-sm text-slate-900 dark:text-white">Zona Diamond (Mesas A1 a B5)</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">$100.000 COP por puesto | 10 Mesas (100 Puestos)</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 bg-indigo-600 text-white rounded-full">Primera Fila VIP</span>
+                <i id="zone-icon-diamond" class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
+              </div>
+            </button>
+            <div id="zone-content-diamond" class="p-6 bg-white dark:bg-slate-800 border-t border-indigo-100 dark:border-indigo-900/40">
+              <div class="tables-grid" id="tables-zone-diamond"></div>
+            </div>
+          </div>
+
+          <!-- ZONA GOLD -->
+          <div class="zone-accordion border border-amber-200 dark:border-amber-900/60 rounded-2xl overflow-hidden shadow-sm">
+            <button type="button" id="zone-header-gold" onclick="appController.handleToggleZone('gold')" class="w-full px-5 py-4 bg-amber-50/70 dark:bg-amber-950/40 text-left flex items-center justify-between transition-colors cursor-pointer">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-amber-500 text-slate-900 flex items-center justify-center text-sm font-black">
+                  🥇
+                </span>
+                <div>
+                  <h3 class="font-black text-sm text-slate-900 dark:text-white">Zona Gold (Mesas C1 a H5)</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">$70.000 COP por puesto | 30 Mesas (300 Puestos)</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 bg-amber-500 text-slate-900 rounded-full">Preferencial</span>
+                <i id="zone-icon-gold" class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+              </div>
+            </button>
+            <div id="zone-content-gold" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-amber-100 dark:border-amber-900/40">
+              <div class="tables-grid" id="tables-zone-gold"></div>
+            </div>
+          </div>
+
+          <!-- ZONA SILVER -->
+          <div class="zone-accordion border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+            <button type="button" id="zone-header-silver" onclick="appController.handleToggleZone('silver')" class="w-full px-5 py-4 bg-slate-100 dark:bg-slate-700/60 text-left flex items-center justify-between transition-colors cursor-pointer">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-slate-500 text-white flex items-center justify-center text-sm font-black">
+                  🥈
+                </span>
+                <div>
+                  <h3 class="font-black text-sm text-slate-900 dark:text-white">Zona Silver (Mesas I1 a L5)</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">$40.000 COP por puesto | 20 Mesas (200 Puestos)</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-500 text-white rounded-full">General</span>
+                <i id="zone-icon-silver" class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+              </div>
+            </button>
+            <div id="zone-content-silver" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+              <div class="tables-grid" id="tables-zone-silver"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== VISTA 2: MIS BOLETAS COMPRADAS ==================== -->
+  <main id="view-my-tickets" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white">Mis Boletas Compradas</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Consulta tus comprobantes digitales y códigos QR oficiales para el ingreso.</p>
+      </div>
+      <button onclick="appController.handleNavigate('client')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Mapa
+      </button>
+    </div>
+
+    <div id="my-tickets-container"></div>
+  </main>
+
+  <!-- ==================== VISTA 3: PANEL DE ADMINISTRADOR ==================== -->
+  <main id="view-admin" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white">Panel de Control Administrador</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Métricas en tiempo real, gestión de ventas de boletas y control de personal Staff.</p>
+      </div>
+      <button onclick="appController.handleNavigate('client')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+        <i class="fa-solid fa-chair"></i> Ir al Mapa para Apartar / Vender
+      </button>
+    </div>
+
+    <!-- Tarjetas de Métricas en Vivo -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sillas Vendidas</span>
+        <div class="text-xl font-black text-slate-900 dark:text-white" id="stat-sillas-vendidas">0 / 600</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ocupación</span>
+        <div class="text-xl font-black text-indigo-600 dark:text-indigo-400" id="stat-porcentaje">0%</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Ingresos</span>
+        <div class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="stat-total-ingresado">$0 COP</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pendientes</span>
+        <div class="text-xl font-black text-amber-500" id="stat-pendientes">0</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-1 col-span-2 sm:col-span-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ingresadas</span>
+        <div class="text-xl font-black text-sky-500" id="stat-ingresadas">0</div>
+      </div>
+    </div>
+
+    <!-- Tabla de Ventas en Vivo -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-indigo-600"></i> Historial de Ventas en Vivo
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-700">
+              <th class="py-3 px-4">Código</th>
+              <th class="py-3 px-4">Cliente</th>
+              <th class="py-3 px-4 text-center">Entradas</th>
+              <th class="py-3 px-4">Puestos</th>
+              <th class="py-3 px-4">Fecha / Hora</th>
+              <th class="py-3 px-4">Estado</th>
+              <th class="py-3 px-4 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="admin-sales-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Gestión de Personal Staff -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-emerald-500"></i> Crear Nuevo Validador Staff
+        </h3>
+        <form onsubmit="appController.handleCreateStaffSubmit(event)" class="space-y-3">
+          <div class="flex items-center gap-3">
+            <img id="newStaffAvatarPreview" src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120" class="w-12 h-12 rounded-2xl object-cover border border-slate-200 shrink-0">
+            <label class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer transition-all">
+              <i class="fa-solid fa-camera"></i> Subir Foto
+              <input type="file" accept="image/*" class="hidden" onchange="appController.handleStaffAvatarSelected(event)">
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="stf-nombre" placeholder="Nombre" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            <input type="text" id="stf-apellido" placeholder="Apellido" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Puerta & Zonas de Acceso Asignadas *</label>
+            <select id="stf-door" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400">
+              <option value="Puerta 1 - Acceso VIP & Diamond">🚪 Puerta 1 - Acceso VIP & Diamond (Mesas A y B)</option>
+              <option value="Puerta 2 - Acceso Preferencial Gold">🚪 Puerta 2 - Acceso Preferencial Gold (Mesas C a H)</option>
+              <option value="Puerta 3 - Acceso General Silver">🚪 Puerta 3 - Acceso General Silver (Mesas I a L)</option>
+              <option value="Puerta Principal / Acceso Total">🚪 Puerta Principal / Acceso Total (Todas las Zonas)</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="stf-username" placeholder="Username" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            <input type="password" id="stf-password" placeholder="Contraseña" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400">
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-100 transition-all">
+            Guardar Personal Staff
+          </button>
+        </form>
+      </div>
+
+      <div class="lg:col-span-7 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-users-gear text-indigo-500"></i> Personal Staff Autorizado
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-700">
+                <th class="py-2.5 px-4">Validador</th>
+                <th class="py-2.5 px-4">Usuario</th>
+                <th class="py-2.5 px-4">Puerta / Control</th>
+                <th class="py-2.5 px-4 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="admin-staff-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== VISTA 4: MÓDULO ESCÁNER STAFF ==================== -->
+  <main id="view-staff" class="hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white">Módulo Escáner de Validación QR</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Apunta la cámara al código QR del comprobante para verificar validez y registrar acceso.</p>
+      </div>
+      <button onclick="appController.handleNavigate('client')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Mapa
+      </button>
+    </div>
+
+    <!-- Visor de Cámara QR -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-6">
+      <div class="max-w-sm mx-auto overflow-hidden rounded-2xl border-2 border-slate-200 dark:border-slate-700 relative bg-slate-950">
+        <div id="reader" class="w-full"></div>
+      </div>
+
+      <!-- Entrada Manual -->
+      <div class="max-w-md mx-auto flex items-center gap-2">
+        <input type="text" id="input-manual-code" placeholder="Código de compra (Ej: OPN-491028 o ORD-9102)" class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-emerald-400">
+        <button onclick="appController.handleValidateManualCode()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all">
+          Validar Código
+        </button>
+      </div>
+
+      <!-- Tarjeta de Resultado de Validación -->
+      <div id="scan-result-card" class="hidden max-w-md mx-auto"></div>
+    </div>
+  </main>
+
+  <!-- ==================== MODAL 1: CHECKOUT & PAGO ==================== -->
+  <div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 border border-slate-200 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-credit-card text-indigo-600"></i> Confirmar Reserva & Pago
+        </h3>
+        <button onclick="appController.handleCloseCheckoutModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="appController.handleConfirmPayment(event)" class="space-y-4">
+        <div class="bg-indigo-50 dark:bg-indigo-950/50 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900 space-y-1 text-xs">
+          <div class="flex justify-between text-slate-500 dark:text-slate-400 font-semibold">
+            <span>Puestos Seleccionados:</span>
+            <span id="checkoutSeatsList" class="font-bold text-slate-800 dark:text-slate-200"></span>
+          </div>
+          <div class="flex justify-between text-slate-700 dark:text-slate-200 font-extrabold text-sm pt-1">
+            <span>Monto Total:</span>
+            <span id="checkoutTotalBadge" class="font-mono font-black text-indigo-600 dark:text-indigo-400"></span>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label>Nombre Completo del Titular *</label>
+          <input type="text" id="checkoutBuyerName" required placeholder="Tu Nombre y Apellido" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        </div>
+
+        <div class="space-y-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label>Correo Electrónico *</label>
+          <input type="email" id="checkoutBuyerEmail" required placeholder="correo@ejemplo.com" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <div>
+            <label>Teléfono Celular</label>
+            <input type="tel" id="checkoutBuyerPhone" placeholder="300 123 4567" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+          </div>
+          <div>
+            <label>Método de Pago</label>
+            <select id="checkoutPaymentMethod" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+              <option value="Transferencia Bancolombia">Bancolombia</option>
+              <option value="Transferencia Nequi">Nequi</option>
+              <option value="Pago en Taquilla">Pago en Taquilla</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label>N° Comprobante / Referencia de Transferencia</label>
+          <input type="text" id="checkoutReceiptRef" placeholder="Ej: BANCOL-948102 o N° Transacción" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        </div>
+
+        <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-lg shadow-indigo-100 transition-all">
+          Confirmar Compra y Generar Comprobante
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: COMPROBANTE OFICIAL & QR ==================== -->
+  <div id="ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 border border-slate-200 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Área Imprimible del Boleto -->
+      <div id="ticket-print-area" class="space-y-4 p-4 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs">
+        <div class="text-center border-b border-slate-200 dark:border-slate-700 pb-3">
+          <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block">OpenTheDoor Pass Oficial</span>
+          <h2 class="text-lg font-black text-slate-900 dark:text-white mt-1">Gran Gala & Concierto Exclusivo</h2>
+          <p class="text-[11px] text-slate-500">Presenta este comprobante en la entrada para validación por escáner QR</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div><strong class="text-slate-400 block text-[9px] uppercase">ID Pedido:</strong> <span id="lbl-id-pedido" class="font-mono font-bold"></span></div>
+          <div><strong class="text-slate-400 block text-[9px] uppercase">Titular:</strong> <span id="lbl-nombre-cliente" class="font-bold"></span></div>
+          <div><strong class="text-slate-400 block text-[9px] uppercase">Fecha / Hora:</strong> <span id="lbl-fecha-hora" class="font-semibold"></span></div>
+          <div><strong class="text-slate-400 block text-[9px] uppercase">Código Compra:</strong> <span id="lbl-codigo-compra" class="font-mono font-black text-indigo-600 dark:text-indigo-400"></span></div>
+        </div>
+
+        <div class="p-3 bg-indigo-50/70 dark:bg-indigo-950/40 rounded-2xl border border-indigo-200/80 dark:border-indigo-900/60 flex items-center justify-between gap-2">
+          <div>
+            <strong class="text-indigo-600 dark:text-indigo-400 block text-[9px] uppercase font-black">Puerta de Ingreso Asignada:</strong>
+            <span id="lbl-puerta-asignada" class="font-extrabold text-slate-900 dark:text-slate-100 text-xs">Puerta 1 - Acceso VIP & Diamond</span>
+          </div>
+          <span id="lbl-zona-nombre" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-indigo-600 text-white shrink-0">
+            Zona Diamond VIP
+          </span>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+          <strong class="text-slate-400 block text-[9px] uppercase">Puestos Asignados:</strong>
+          <div id="lbl-puestos-detalles" class="font-extrabold text-slate-900 dark:text-slate-100 text-xs"></div>
+          <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700 text-xs">
+            <span class="font-bold">Total Pagado:</span>
+            <span id="lbl-valor-pagar" class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm"></span>
+          </div>
+        </div>
+
+        <!-- Código QR Canvas -->
+        <div class="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div id="qr-canvas-wrapper" class="p-2 bg-white rounded-lg shadow-sm"></div>
+          <span class="text-[9px] text-slate-400 font-mono mt-1">CÓDIGO DE VALIDACIÓN ANTI-FRAUDE</span>
+        </div>
+      </div>
+
+      <!-- Acciones del Comprobante -->
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="appController.handleDownloadPdf()" class="py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+          <i class="fa-solid fa-file-pdf"></i> Guardar PDF
+        </button>
+        <button onclick="appController.handleShareReceipt()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+          <i class="fa-brands fa-whatsapp"></i> Compartir
+        </button>
+        <button onclick="appController.handleCloseReceiptModal()" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: INICIAR SESIÓN / REGISTRO CLIENTE ==================== -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl">
+      
+      <div class="flex border-b border-slate-200 dark:border-slate-700 pb-1">
+        <button id="tab-login-btn" onclick="appController.handleSwitchAuthTab('login')" class="flex-1 py-2 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600">
+          Iniciar Sesión
+        </button>
+        <button id="tab-register-btn" onclick="appController.handleSwitchAuthTab('register')" class="flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent">
+          Registrarse
+        </button>
+      </div>
+
+      <!-- Botón Principal Iniciar con Google -->
+      <div class="space-y-2 pt-1">
+        <button type="button" onclick="appController.handleGooglePromptOrDemo()" class="w-full py-3 px-4 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-2 border-indigo-100 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-2xl text-xs font-black text-slate-800 dark:text-white shadow-sm transition-all flex items-center justify-center gap-3">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>Continuar con Google</span>
+        </button>
+
+        <div id="google-btn-rendered" class="flex justify-center"></div>
+
+        <div class="relative flex items-center justify-center py-1">
+          <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
+          <span class="bg-white dark:bg-slate-800 px-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider absolute">o con tu correo</span>
+        </div>
+      </div>
+
+      <!-- Form Login -->
+      <form id="form-login" onsubmit="appController.handleLoginSubmit(event)" class="space-y-3">
+        <input type="email" id="login-email" placeholder="Correo electrónico" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        <input type="password" id="login-password" placeholder="Contraseña" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all">
+          Ingresar
+        </button>
+      </form>
+
+      <!-- Form Registro con Foto Personalizada -->
+      <form id="form-register" onsubmit="appController.handleRegisterSubmit(event)" class="hidden space-y-3">
+        <div class="flex items-center gap-3">
+          <img id="regAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120" class="w-10 h-10 rounded-full object-cover border border-slate-200">
+          <label class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-bold cursor-pointer transition-all">
+            <i class="fa-solid fa-camera"></i> Subir Foto
+            <input type="file" accept="image/*" class="hidden" onchange="appController.handleUserAvatarSelected(event)">
+          </label>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="reg-name" placeholder="Nombre" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+          <input type="text" id="reg-lastname" placeholder="Apellido" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        </div>
+        <input type="email" id="reg-email" placeholder="Correo electrónico" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="password" id="reg-password" placeholder="Contraseña" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="password" id="reg-confirm-password" placeholder="Confirmar contraseña" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all">
+          Crear Cuenta
+        </button>
+      </form>
+
+      <div class="text-center pt-1">
+        <button onclick="appController.handleCloseAuthModal()" class="text-xs text-slate-400 hover:text-slate-600">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: PORTAL ADMIN & STAFF ==================== -->
+  <div id="portal-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl">
+      
+      <div class="flex border-b border-slate-200 dark:border-slate-700 pb-1">
+        <button id="tab-portal-admin-btn" onclick="appController.handleSwitchPortalTab('admin')" class="flex-1 py-2 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600">
+          Administrador
+        </button>
+        <button id="tab-portal-staff-btn" onclick="appController.handleSwitchPortalTab('staff')" class="flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent">
+          Validador Staff
+        </button>
+      </div>
+
+      <!-- Login Admin -->
+      <form id="form-portal-admin" onsubmit="appController.handleAdminLoginSubmit(event)" class="space-y-3">
+        <input type="text" id="admin-user" value="admin" placeholder="Usuario Admin" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        <input type="password" id="admin-pass" value="admin123password" placeholder="Contraseña" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all">
+          Acceder como Administrador
+        </button>
+      </form>
+
+      <!-- Login Staff -->
+      <form id="form-portal-staff" onsubmit="appController.handleStaffLoginSubmit(event)" class="hidden space-y-3">
+        <input type="text" id="staff-user" value="puerta1" placeholder="Username Staff" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        <input type="password" id="staff-pass" value="puerta123password" placeholder="Contraseña Staff" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-400">
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all">
+          Acceder como Validador Staff
+        </button>
+      </form>
+
+      <div class="text-center pt-2">
+        <button onclick="appController.handleClosePortalModal()" class="text-xs text-slate-400 hover:text-slate-600">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Toasts -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Carga de Módulos MVC -->
+  <script src="js/config.js?v=3.0"></script>
+  <script src="js/models/TicketModel.js?v=3.0"></script>
+  <script src="js/views/TicketView.js?v=3.0"></script>
+  <script src="js/controllers/TicketController.js?v=3.0"></script>
+  <script src="js/app.js?v=3.0"></script>
+</body>
+</html>

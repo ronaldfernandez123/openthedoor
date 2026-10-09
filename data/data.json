@@ -1,0 +1,132 @@
+{
+  "seatsState": {
+    "A1-S9": {
+      "status": "sold"
+    },
+    "A1-S3": {
+      "status": "sold"
+    },
+    "A1-S2": {
+      "status": "sold",
+      "buyer": "ronaldfernans15"
+    }
+  },
+  "salesHistory": [
+    {
+      "idPedido": "ORD-002662",
+      "codigoCompra": "OPN-997419",
+      "cliente": "Ronald Fernandez",
+      "email": "ronaldfernans15@gmail.com",
+      "telefono": "3135306614",
+      "numEntradas": 2,
+      "puestos": [
+        "A1-S9",
+        "A1-S3"
+      ],
+      "total": 200000,
+      "metodoPago": "Transferencia Bancolombia",
+      "comprobanteRef": "BANCOL-201782",
+      "fechaHora": "8/10/2026, 12:56:42 p. m.",
+      "usado": false,
+      "escaneadoPor": null,
+      "fechaEscaneo": null,
+      "estadoPago": "APROBADO"
+    },
+    {
+      "idPedido": "ORD-052357",
+      "codigoCompra": "OPN-593831",
+      "cliente": "ronaldfernans15",
+      "email": "ronaldfernans15@gmail.com",
+      "telefono": "3176774920",
+      "numEntradas": 1,
+      "puestos": [
+        "A1-S2"
+      ],
+      "zonas": [
+        "DIAMOND"
+      ],
+      "zonaNombre": "Zona Diamond VIP",
+      "puertaSugerida": "Puerta 1 - Acceso VIP & Diamond",
+      "total": 100000,
+      "metodoPago": "Transferencia Bancolombia",
+      "comprobanteRef": "BANCOLOMBIA  123456",
+      "fechaHora": "8/10/2026, 1:30:52 p. m.",
+      "usado": false,
+      "escaneadoPor": null,
+      "fechaEscaneo": null,
+      "estadoPago": "APROBADO"
+    }
+  ],
+  "staffUsers": [
+    {
+      "id": "STF-001",
+      "nombre": "Mateo",
+      "apellido": "Rivas",
+      "username": "puerta1",
+      "password": "puerta123password",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "door": "Puerta Principal - Diamond & Gold",
+      "fechaCreacion": "08/10/2026"
+    },
+    {
+      "id": "STF-002",
+      "nombre": "Laura",
+      "apellido": "Castro",
+      "username": "puerta2",
+      "password": "puerta123password",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      "door": "Puerta Lateral - Silver",
+      "fechaCreacion": "08/10/2026"
+    }
+  ],
+  "adminSessions": {},
+  "eventInfo": {
+    "id": "EVT-OPENDOOR-01",
+    "title": "Gran Gala & Concierto Exclusivo - Reserva de Mesas",
+    "date": "2026-11-28T20:00",
+    "venue": "Gran Salón Real & Arena 360°",
+    "address": "Centro de Convenciones & Eventos Metropolitan, Bogotá",
+    "image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80",
+    "category": "Concierto & Gala",
+    "totalCapacity": 600,
+    "minAge": "+18 años",
+    "doorsOpen": "18:30 hs",
+    "parking": "Parqueadero privado con servicio de valet parking",
+    "announcement": "Apertura de puertas a las 18:30 hs. Presentar comprobante digital con código QR para validación por cámara en puerta asignada.",
+    "zones": {
+      "DIAMOND": {
+        "name": "Zona Diamond",
+        "price": 100000,
+        "start": "A",
+        "end": "B",
+        "tablesPerLetter": 5,
+        "seatsPerTable": 10,
+        "totalSeats": 100,
+        "color": "indigo",
+        "door": "Puerta 1 - Acceso VIP & Diamond"
+      },
+      "GOLD": {
+        "name": "Zona Gold",
+        "price": 70000,
+        "start": "C",
+        "end": "H",
+        "tablesPerLetter": 5,
+        "seatsPerTable": 10,
+        "totalSeats": 300,
+        "color": "amber",
+        "door": "Puerta 2 - Acceso Preferencial Gold"
+      },
+      "SILVER": {
+        "name": "Zona Silver",
+        "price": 40000,
+        "start": "I",
+        "end": "L",
+        "tablesPerLetter": 5,
+        "seatsPerTable": 10,
+        "totalSeats": 200,
+        "color": "slate",
+        "door": "Puerta 3 - Acceso General Silver"
+      }
+    }
+  }
+}

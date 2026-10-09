@@ -1,0 +1,26 @@
+{
+  "name": "openthedoor",
+  "version": "2.0.0",
+  "description": "OpenTheDoor - Plataforma de Boletería Digital Inteligente con Sincronización WebSockets en Tiempo Real, Control de Accesos y Backend Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "openthedoor",
+    "ticketentry",
+    "boleteria",
+    "websockets",
+    "socketio",
+    "control-acceso",
+    "tickets-qr"
+  ],
+  "author": "OpenTheDoor Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}

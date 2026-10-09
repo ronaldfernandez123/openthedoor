@@ -1,0 +1,24 @@
+{
+  "name": "TicketEntry - Boletería Digital Inteligente",
+  "short_name": "TicketEntry",
+  "description": "Plataforma de boletería digital inteligente, emisión y validación de boletos QR anti-fraude en tiempo real.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' fill='%234f46e5'><rect width='192' height='192' rx='36' fill='%234f46e5'/><path d='M40 50h112a12 12 0 0 1 12 12v18a12 12 0 0 0 0 24v18a12 12 0 0 1-12 12H40a12 12 0 0 1-12-12v-18a12 12 0 0 0 0-24V62a12 12 0 0 1 12-12zm0 14v10a22 22 0 0 1 0 44v10h112V118a22 22 0 0 1 0-44V64H40zm48 18a8 8 0 0 1 8 8v20a8 8 0 0 1-16 0V90a8 8 0 0 1 8-8zm32 0a8 8 0 0 1 8 8v20a8 8 0 0 1-16 0V90a8 8 0 0 1 8-8z' fill='white'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%234f46e5'><rect width='512' height='512' rx='96' fill='%234f46e5'/><path d='M100 130h312a32 32 0 0 1 32 32v48a32 32 0 0 0 0 64v48a32 32 0 0 1-32 32H100a32 32 0 0 1-32-32v-48a32 32 0 0 0 0-64v-48a32 32 0 0 1 32-32zm0 38v26a58 58 0 0 1 0 116v26h312v-26a58 58 0 0 1 0-116v-26H100zm128 48a20 20 0 0 1 20 20v54a20 20 0 0 1-40 0v-54a20 20 0 0 1 20-20zm84 0a20 20 0 0 1 20 20v54a20 20 0 0 1-40 0v-54a20 20 0 0 1 20-20z' fill='white'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
