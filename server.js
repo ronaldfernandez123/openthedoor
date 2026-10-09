@@ -13,10 +13,13 @@ const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
+
+// Configuración estricta de CORS para Socket.IO (Permite conexión desde Vercel)
 const io = new Server(server, {
   cors: {
     origin: '*',
-    methods: ['GET', 'POST']
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
   }
 });
 
@@ -208,8 +211,8 @@ function isAdmin(socket) {
   return socket.data.admin === true;
 }
 
-// --- MIDDLEWARES & ARCHIVOS ESTÁTICOS ---
-app.use(cors());
+// --- MIDDLEWARES (Habilitar CORS global) ---
+app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
@@ -221,17 +224,24 @@ app.use((req, res, next) => {
   next();
 });
 
+// Servir archivos estáticos si existen
+const indexPath = path.join(__dirname, 'index.html');
 app.use(express.static(__dirname, {
   etag: false,
-  maxAge: 0,
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  }
+  maxAge: 0
 }));
 
 // --- RUTAS PRINCIPALES ---
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.json({
+      status: 'online',
+      message: 'Servidor Backend de OpenTheDoor activo en Railway',
+      health: '/api/health'
+    });
+  }
 });
 
 app.get('/api/health', (req, res) => {
@@ -639,7 +649,7 @@ server.listen(PORT, () => {
   ========================================================================
   🚀 OpenTheDoor - Servidor de Boletería Activo
   ========================================================================
-  📍 URL Local:         http://localhost:${PORT}
+  📍 Puerto Activo:     ${PORT}
   📍 Evento Único:      ${EVENT_INFO.title} (Aforo: ${TOTAL_CAPACITY} puestos)
   📍 Validación:        Control estricto por Puertas (1-VIP, 2-Gold, 3-Silver)
   📍 Persistencia:      ${DATA_FILE}
