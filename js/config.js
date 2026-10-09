@@ -3,7 +3,34 @@
    ========================================================================== */
 
 const STORAGE_KEY = 'openthedoor_v2_data';
-const SOCKET_SERVER_URL = window.location.origin;
+
+// ⚠️ REEMPLAZA ESTA URL POR TU DOMINIO REAL DE RAILWAY
+const RAILWAY_BACKEND_URL = "https://TU-PROYECTO.up.railway.app";
+
+// Detecta si estás probando localmente o en producción (Vercel)
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const SOCKET_SERVER_URL = isLocal ? 'http://localhost:3000' : RAILWAY_BACKEND_URL;
+
+// Inicialización global de Socket.IO
+const socket = io(SOCKET_SERVER_URL, {
+  transports: ['websocket', 'polling'],
+  autoConnect: true,
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000
+});
+
+socket.on('connect', () => {
+  console.log('✅ Conectado exitosamente al Backend en Railway:', socket.id);
+});
+
+socket.on('connect_error', (error) => {
+  console.error('❌ Error de conexión con Socket.IO:', error.message);
+});
+
+socket.on('disconnect', (reason) => {
+  console.warn('⚠️ Desconectado del servidor:', reason);
+});
 
 const EVENT_CONFIG = {
   id: "EVT-OPENDOOR-01",
