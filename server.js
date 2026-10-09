@@ -1,5 +1,5 @@
 /* ==========================================================================
-   OpenTheDoor - SERVER (Node.js + Express + Socket.IO WebSockets)
+   OpenTheDoor - SERVER (Node.js + Express + Socket.IO WebSockets + PostgreSQL)
    Control de Acceso Inteligente por Puertas & Zonas Asignadas
    ========================================================================== */
 
@@ -7,14 +7,25 @@ const express = require('express');
 const http = require('http');
 const crypto = require('crypto');
 const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
 const { Server } = require('socket.io');
+const { Pool } = require('pg');
 
 const app = express();
 const server = http.createServer(app);
 
-// Configuración de CORS y Socket.IO óptima para Railway + Vercel
+// Connection String de PostgreSQL
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:DqNiRwlZxgkHwHKSNCKlnoPGqGOcmhVY@tokaido.proxy.rlwy.net:44633/railway';
+
+// Pool de conexiones a PostgreSQL
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// Configuración de CORS y Socket.IO
 const io = new Server(server, {
   cors: {
     origin: '*',
@@ -26,15 +37,10 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 8080;
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-const DATA_FILE = path.join(DATA_DIR, 'data.json');
 
 // --- CONFIGURACIÓN DEL EVENTO ÚNICO (600 PUESTOS / 60 MESAS) ---
 const TOTAL_CAPACITY = 600;
-const LOCK_TIME_MS = 5 * 60 * 1000; // 5 Minutos (Temporizador de Reserva)
+const LOCK_TIME_MS = 5 * 60 * 1000; // 5 Minutos
 
 const EVENT_INFO = {
   id: "EVT-OPENDOOR-01",
@@ -109,91 +115,149 @@ const ADMIN_USERS = [
   { username: 'admindos', password: 'emhotelsadmin31', name: 'Andrés Morales (Admin)', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', isSuperAdmin: true }
 ];
 
-// --- ESTADO EN MEMORIA ---
+// --- ESTADO EN MEMORIA Y TIMERS ---
 let seatsState = {};       // seatId -> { status: 'available'|'locked'|'sold', userId, expiresAt }
 let salesHistory = [];     // Array de compras realizadas
-let staffUsers = [         // Validadores con puertas y zonas asignadas
-  {
-    id: "STF-001",
-    nombre: "Mateo",
-    apellido: "Rivas",
-    username: "puerta1",
-    password: "puerta123password",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-    door: "Puerta 1 - Acceso VIP & Diamond",
-    allowedZones: ["DIAMOND"],
-    fechaCreacion: "08/10/2026"
-  },
-  {
-    id: "STF-002",
-    nombre: "Laura",
-    apellido: "Castro",
-    username: "puerta2",
-    password: "puerta123password",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
-    door: "Puerta 2 - Acceso Preferencial Gold",
-    allowedZones: ["GOLD"],
-    fechaCreacion: "08/10/2026"
-  },
-  {
-    id: "STF-003",
-    nombre: "Julián",
-    apellido: "Pérez",
-    username: "puerta3",
-    password: "puerta123password",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80",
-    door: "Puerta 3 - Acceso General Silver",
-    allowedZones: ["SILVER"],
-    fechaCreacion: "08/10/2026"
-  }
-];
+let staffUsers = [];       // Validadores cargados desde PostgreSQL
 let adminSessions = {};    // token -> username
 const activeTimers = {};   // seatId -> setTimeout
 
-// --- PERSISTENCIA EN DATA.JSON ---
-function cargarDatos() {
+// --- INICIALIZACIÓN Y TABLAS EN POSTGRESQL ---
+async function initDb() {
   try {
-    if (fs.existsSync(DATA_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-      seatsState = parsed.seatsState || {};
-      salesHistory = parsed.salesHistory || [];
-      if (Array.isArray(parsed.staffUsers) && parsed.staffUsers.length > 0) {
-        staffUsers = parsed.staffUsers;
+    // 1. Tabla Historial de Ventas
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS sales_history (
+        id_pedido VARCHAR(50) PRIMARY KEY,
+        codigo_compra VARCHAR(50) UNIQUE NOT NULL,
+        cliente VARCHAR(255) NOT NULL,
+        email VARCHAR(255),
+        telefono VARCHAR(50),
+        num_entradas INT NOT NULL,
+        puestos JSONB NOT NULL,
+        zonas JSONB NOT NULL,
+        zona_nombre VARCHAR(100),
+        puerta_sugerida VARCHAR(100),
+        total NUMERIC(12, 2) NOT NULL,
+        metodo_pago VARCHAR(100),
+        comprobante_ref VARCHAR(100),
+        fecha_hora VARCHAR(100),
+        usado BOOLEAN DEFAULT FALSE,
+        escaneado_por VARCHAR(100),
+        fecha_escaneo VARCHAR(100),
+        estado_pago VARCHAR(50) DEFAULT 'APROBADO',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // 2. Tabla Personal Staff
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS staff_users (
+        id VARCHAR(50) PRIMARY KEY,
+        nombre VARCHAR(100) NOT NULL,
+        apellido VARCHAR(100) NOT NULL,
+        username VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        door VARCHAR(255) NOT NULL,
+        allowed_zones JSONB NOT NULL,
+        avatar TEXT,
+        fecha_creacion VARCHAR(50)
+      );
+    `);
+
+    // 3. Tabla Estado de Sillas
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS seats_state (
+        seat_id VARCHAR(20) PRIMARY KEY,
+        status VARCHAR(20) NOT NULL,
+        user_id VARCHAR(100),
+        buyer VARCHAR(255),
+        expires_at BIGINT
+      );
+    `);
+
+    console.log('✅ Tablas verificadas/creadas exitosamente en PostgreSQL');
+
+    // Poblar staff inicial si la tabla está vacía
+    const staffRes = await pool.query('SELECT COUNT(*) FROM staff_users');
+    if (parseInt(staffRes.rows[0].count) === 0) {
+      const initialStaff = [
+        { id: "STF-001", nombre: "Mateo", apellido: "Rivas", username: "puerta1", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", door: "Puerta 1 - Acceso VIP & Diamond", allowedZones: JSON.stringify(["DIAMOND"]), fechaCreacion: "08/10/2026" },
+        { id: "STF-002", nombre: "Laura", apellido: "Castro", username: "puerta2", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80", door: "Puerta 2 - Acceso Preferencial Gold", allowedZones: JSON.stringify(["GOLD"]), fechaCreacion: "08/10/2026" },
+        { id: "STF-003", nombre: "Julián", apellido: "Pérez", username: "puerta3", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80", door: "Puerta 3 - Acceso General Silver", allowedZones: JSON.stringify(["SILVER"]), fechaCreacion: "08/10/2026" }
+      ];
+
+      for (const st of initialStaff) {
+        await pool.query(
+          `INSERT INTO staff_users (id, nombre, apellido, username, password, door, allowed_zones, avatar, fecha_creacion)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [st.id, st.nombre, st.apellido, st.username, st.password, st.door, st.allowedZones, st.avatar, st.fechaCreacion]
+        );
       }
-      adminSessions = parsed.adminSessions || {};
-      console.log('✅ Base de datos cargada desde data.json');
-    } else {
-      guardarDatos();
-      console.log('⚡ data.json inicializado');
+      console.log('⚡ Personal Staff por defecto insertado en PostgreSQL');
     }
-  } catch (err) {
-    console.error('⚠️ Error leyendo data.json:', err);
-  }
 
-  // Limpiar bloqueos expirados en reinicio
-  Object.keys(seatsState).forEach(id => {
-    if (seatsState[id].status !== 'sold') delete seatsState[id];
-  });
-  salesHistory.forEach(v => {
-    if (Array.isArray(v.puestos)) {
-      v.puestos.forEach(id => { seatsState[id] = { status: 'sold' }; });
-    }
-  });
+    await cargarDatosDesdeDb();
+  } catch (err) {
+    console.error('❌ Error inicializando PostgreSQL:', err);
+  }
 }
 
-function guardarDatos() {
+// Cargar datos de la BD a memoria al encender
+async function cargarDatosDesdeDb() {
   try {
-    fs.writeFileSync(
-      DATA_FILE,
-      JSON.stringify({ seatsState, salesHistory, staffUsers, adminSessions, eventInfo: EVENT_INFO }, null, 2),
-      'utf8'
-    );
+    // Cargar Ventas
+    const salesRes = await pool.query('SELECT * FROM sales_history ORDER BY created_at ASC');
+    salesHistory = salesRes.rows.map(r => ({
+      idPedido: r.id_pedido,
+      codigoCompra: r.codigo_compra,
+      cliente: r.cliente,
+      email: r.email,
+      telefono: r.telefono,
+      numEntradas: r.num_entradas,
+      puestos: typeof r.puestos === 'string' ? JSON.parse(r.puestos) : r.puestos,
+      zonas: typeof r.zonas === 'string' ? JSON.parse(r.zonas) : r.zonas,
+      zonaNombre: r.zona_nombre,
+      puertaSugerida: r.puerta_sugerida,
+      total: Number(r.total),
+      metodoPago: r.metodo_pago,
+      comprobanteRef: r.comprobante_ref,
+      fechaHora: r.fecha_hora,
+      usado: r.usado,
+      escaneadoPor: r.escaneado_por,
+      fechaEscaneo: r.fecha_escaneo,
+      estadoPago: r.estado_pago
+    }));
+
+    // Cargar Staff
+    const staffRes = await pool.query('SELECT * FROM staff_users ORDER BY fecha_creacion ASC');
+    staffUsers = staffRes.rows.map(r => ({
+      id: r.id,
+      nombre: r.nombre,
+      apellido: r.apellido,
+      username: r.username,
+      password: r.password,
+      door: r.door,
+      allowedZones: typeof r.allowed_zones === 'string' ? JSON.parse(r.allowed_zones) : r.allowed_zones,
+      avatar: r.avatar,
+      fechaCreacion: r.fecha_creacion
+    }));
+
+    // Cargar Estado de Sillas Vendidas
+    seatsState = {};
+    salesHistory.forEach(v => {
+      if (Array.isArray(v.puestos)) {
+        v.puestos.forEach(id => { seatsState[id] = { status: 'sold', buyer: v.cliente }; });
+      }
+    });
+
+    console.log(`✅ Datos sincronizados con PostgreSQL: ${salesHistory.length} ventas y ${staffUsers.length} validadores staff.`);
   } catch (err) {
-    console.error('❌ Error guardando en data.json:', err);
+    console.error('❌ Error leyendo datos desde PostgreSQL:', err);
   }
 }
 
-cargarDatos();
+initDb();
 
 function adminPayload() {
   return {
@@ -226,21 +290,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Servir archivos estáticos si existen localmente
 const indexPath = path.join(__dirname, 'index.html');
-app.use(express.static(__dirname, {
-  etag: false,
-  maxAge: 0
-}));
+app.use(express.static(__dirname, { etag: false, maxAge: 0 }));
 
-// --- RUTAS PRINCIPALES ---
+// --- RUTAS API REST ---
 app.get('/', (req, res) => {
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
     res.json({
       status: 'online',
-      message: 'Servidor Backend de OpenTheDoor activo en Railway',
+      message: 'Servidor Backend de OpenTheDoor activo en Railway con PostgreSQL',
       health: '/api/health'
     });
   }
@@ -250,6 +310,7 @@ app.get('/api/health', (req, res) => {
   const soldCount = Object.values(seatsState).filter(s => s.status === 'sold').length;
   res.json({
     status: 'ok',
+    database: 'PostgreSQL Conectado',
     project: 'OpenTheDoor',
     version: '2.0.0',
     eventName: EVENT_INFO.title,
@@ -268,18 +329,25 @@ app.get('/api/state', (req, res) => {
   });
 });
 
-app.post('/api/reset', (req, res) => {
-  seatsState = {};
-  salesHistory = [];
-  adminSessions = {};
-  Object.keys(activeTimers).forEach(id => {
-    clearTimeout(activeTimers[id]);
-    delete activeTimers[id];
-  });
-  guardarDatos();
-  io.emit('MAP_STATE', seatsState);
-  broadcastAdminData();
-  res.json({ success: true, message: 'Base de datos del evento restablecida a cero.' });
+app.post('/api/reset', async (req, res) => {
+  try {
+    seatsState = {};
+    salesHistory = [];
+    adminSessions = {};
+    Object.keys(activeTimers).forEach(id => {
+      clearTimeout(activeTimers[id]);
+      delete activeTimers[id];
+    });
+
+    await pool.query('DELETE FROM sales_history');
+    await pool.query('DELETE FROM seats_state');
+
+    io.emit('MAP_STATE', seatsState);
+    broadcastAdminData();
+    res.json({ success: true, message: 'Base de datos en PostgreSQL restablecida a cero.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // --- WEBSOCKETS EN TIEMPO REAL (SOCKET.IO) ---
@@ -313,13 +381,11 @@ io.on('connection', (socket) => {
         if (seatsState[seatId] && seatsState[seatId].status === 'locked' && seatsState[seatId].userId === socket.id) {
           delete seatsState[seatId];
           delete activeTimers[seatId];
-          guardarDatos();
           io.emit('SEATS_RELEASED', { seatIds: [seatId] });
         }
       }, LOCK_TIME_MS);
     });
 
-    guardarDatos();
     io.emit('SEATS_LOCKED', { seatIds, userId: socket.id, expiresAt });
   });
 
@@ -341,13 +407,12 @@ io.on('connection', (socket) => {
     });
 
     if (unlocked.length > 0) {
-      guardarDatos();
       io.emit('SEATS_RELEASED', { seatIds: unlocked });
     }
   });
 
-  // 3. CONFIRMAR COMPRA / GENERAR ENTRADA Y QR
-  socket.on('CONFIRM_PURCHASE', (datosCompra) => {
+  // 3. CONFIRMAR COMPRA / GUARDAR EN POSTGRESQL
+  socket.on('CONFIRM_PURCHASE', async (datosCompra) => {
     const seatIds = datosCompra && datosCompra.seatIds;
     if (!Array.isArray(seatIds) || seatIds.length === 0) {
       socket.emit('PURCHASE_FAILED', { message: 'No se enviaron puestos válidos.' });
@@ -399,12 +464,40 @@ io.on('connection', (socket) => {
       estadoPago: datosCompra.estadoPago || "APROBADO"
     };
 
-    salesHistory.push(nuevaVenta);
-    guardarDatos();
+    try {
+      // Guardar en PostgreSQL
+      await pool.query(`
+        INSERT INTO sales_history 
+        (id_pedido, codigo_compra, cliente, email, telefono, num_entradas, puestos, zonas, zona_nombre, puerta_sugerida, total, metodo_pago, comprobante_ref, fecha_hora, usado, estado_pago)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      `, [
+        nuevaVenta.idPedido,
+        nuevaVenta.codigoCompra,
+        nuevaVenta.cliente,
+        nuevaVenta.email,
+        nuevaVenta.telefono,
+        nuevaVenta.numEntradas,
+        JSON.stringify(nuevaVenta.puestos),
+        JSON.stringify(nuevaVenta.zonas),
+        nuevaVenta.zonaNombre,
+        nuevaVenta.puertaSugerida,
+        nuevaVenta.total,
+        nuevaVenta.metodoPago,
+        nuevaVenta.comprobanteRef,
+        nuevaVenta.fechaHora,
+        nuevaVenta.usado,
+        nuevaVenta.estadoPago
+      ]);
 
-    socket.emit('PURCHASE_OK', nuevaVenta);
-    io.emit('SEATS_SOLD', { seatIds, venta: nuevaVenta });
-    broadcastAdminData();
+      salesHistory.push(nuevaVenta);
+
+      socket.emit('PURCHASE_OK', nuevaVenta);
+      io.emit('SEATS_SOLD', { seatIds, venta: nuevaVenta });
+      broadcastAdminData();
+    } catch (err) {
+      console.error('❌ Error guardando compra en PostgreSQL:', err);
+      socket.emit('PURCHASE_FAILED', { message: 'Error procesando la transacción en la base de datos.' });
+    }
   });
 
   // 4. CONSULTAR ENTRADAS DEL CLIENTE
@@ -428,7 +521,6 @@ io.on('connection', (socket) => {
     }
     const token = crypto.randomBytes(24).toString('hex');
     adminSessions[token] = foundAdmin.username;
-    guardarDatos();
 
     socket.data.admin = true;
     socket.data.adminUser = foundAdmin.username;
@@ -463,7 +555,6 @@ io.on('connection', (socket) => {
   socket.on('ADMIN_LOGOUT', ({ token }) => {
     if (token && adminSessions[token]) {
       delete adminSessions[token];
-      guardarDatos();
     }
     socket.data.admin = false;
     socket.leave('admins');
@@ -479,8 +570,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 7. CREAR / ELIMINAR STAFF (ADMIN) CON ASIGNACIÓN DE PUERTA & ZONAS
-  socket.on('CREATE_STAFF', (staffData) => {
+  // 7. CREAR / ELIMINAR STAFF (ADMIN)
+  socket.on('CREATE_STAFF', async (staffData) => {
     if (!isAdmin(socket)) {
       socket.emit('ADMIN_SESSION_INVALID');
       return;
@@ -511,24 +602,47 @@ io.on('connection', (socket) => {
       avatar: staffData.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80",
       fechaCreacion: new Date().toLocaleDateString('es-CO')
     };
-    staffUsers.push(nuevoStaff);
-    guardarDatos();
-    broadcastAdminData();
-    socket.emit('STAFF_CREATED_SUCCESS', nuevoStaff);
+
+    try {
+      await pool.query(`
+        INSERT INTO staff_users (id, nombre, apellido, username, password, door, allowed_zones, avatar, fecha_creacion)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [
+        nuevoStaff.id,
+        nuevoStaff.nombre,
+        nuevoStaff.apellido,
+        nuevoStaff.username,
+        nuevoStaff.password,
+        nuevoStaff.door,
+        JSON.stringify(nuevoStaff.allowedZones),
+        nuevoStaff.avatar,
+        nuevoStaff.fechaCreacion
+      ]);
+
+      staffUsers.push(nuevoStaff);
+      broadcastAdminData();
+      socket.emit('STAFF_CREATED_SUCCESS', nuevoStaff);
+    } catch (err) {
+      console.error('❌ Error creando staff en PostgreSQL:', err);
+    }
   });
 
-  socket.on('DELETE_STAFF', ({ staffId }) => {
+  socket.on('DELETE_STAFF', async ({ staffId }) => {
     if (!isAdmin(socket)) {
       socket.emit('ADMIN_SESSION_INVALID');
       return;
     }
-    staffUsers = staffUsers.filter(s => s.id !== staffId);
-    guardarDatos();
-    broadcastAdminData();
+    try {
+      await pool.query('DELETE FROM staff_users WHERE id = $1', [staffId]);
+      staffUsers = staffUsers.filter(s => s.id !== staffId);
+      broadcastAdminData();
+    } catch (err) {
+      console.error('❌ Error eliminando staff en PostgreSQL:', err);
+    }
   });
 
   // 8. ELIMINAR BOLETA VENDIDA (ADMIN)
-  socket.on('DELETE_TICKET', ({ codigoCompra }) => {
+  socket.on('DELETE_TICKET', async ({ codigoCompra }) => {
     if (!isAdmin(socket)) {
       socket.emit('ADMIN_SESSION_INVALID');
       return;
@@ -537,24 +651,29 @@ io.on('connection', (socket) => {
     if (index === -1) return;
 
     const ticket = salesHistory[index];
-    if (Array.isArray(ticket.puestos)) {
-      ticket.puestos.forEach(seatId => {
-        delete seatsState[seatId];
-        if (activeTimers[seatId]) {
-          clearTimeout(activeTimers[seatId]);
-          delete activeTimers[seatId];
-        }
-      });
-    }
-    salesHistory.splice(index, 1);
-    guardarDatos();
+    try {
+      await pool.query('DELETE FROM sales_history WHERE codigo_compra = $1', [codigoCompra]);
 
-    io.emit('SEATS_RELEASED', { seatIds: ticket.puestos });
-    broadcastAdminData();
+      if (Array.isArray(ticket.puestos)) {
+        ticket.puestos.forEach(seatId => {
+          delete seatsState[seatId];
+          if (activeTimers[seatId]) {
+            clearTimeout(activeTimers[seatId]);
+            delete activeTimers[seatId];
+          }
+        });
+      }
+      salesHistory.splice(index, 1);
+
+      io.emit('SEATS_RELEASED', { seatIds: ticket.puestos });
+      broadcastAdminData();
+    } catch (err) {
+      console.error('❌ Error eliminando ticket en PostgreSQL:', err);
+    }
   });
 
   // 9. VALIDACIÓN QR ESTRICTA POR PUERTA Y ZONA (STAFF Y ADMIN)
-  socket.on('VALIDATE_TICKET', ({ codigo, staffUsername, isRoleAdmin }) => {
+  socket.on('VALIDATE_TICKET', async ({ codigo, staffUsername, isRoleAdmin }) => {
     const cleanCode = (codigo || '').trim();
     const venta = salesHistory.find(v => v.codigoCompra === cleanCode || v.idPedido === cleanCode);
 
@@ -614,15 +733,24 @@ io.on('connection', (socket) => {
     venta.usado = true;
     venta.escaneadoPor = socketIsAdmin ? 'Administrador (Pase Total)' : `${staffUsername || 'Validador Oficial'}`;
     venta.fechaEscaneo = new Date().toLocaleString('es-CO');
-    guardarDatos();
 
-    socket.emit('VALIDATION_RESULT', {
-      status: 'VALID',
-      message: '✅ ENTRADA VÁLIDA - ¡ACCESO PERMITIDO!',
-      detail: `Cliente: ${venta.cliente} | Puestos: ${venta.puestos.join(', ')} | ${zonaNombre} (${correctDoor})`,
-      venta
-    });
-    broadcastAdminData();
+    try {
+      await pool.query(`
+        UPDATE sales_history 
+        SET usado = TRUE, escaneado_por = $1, fecha_escaneo = $2 
+        WHERE codigo_compra = $3 OR id_pedido = $3
+      `, [venta.escaneadoPor, venta.fechaEscaneo, cleanCode]);
+
+      socket.emit('VALIDATION_RESULT', {
+        status: 'VALID',
+        message: '✅ ENTRADA VÁLIDA - ¡ACCESO PERMITIDO!',
+        detail: `Cliente: ${venta.cliente} | Puestos: ${venta.puestos.join(', ')} | ${zonaNombre} (${correctDoor})`,
+        venta
+      });
+      broadcastAdminData();
+    } catch (err) {
+      console.error('❌ Error actualizando escaneo en PostgreSQL:', err);
+    }
   });
 
   // 10. DESCONEXIÓN DEL CLIENTE
@@ -640,23 +768,20 @@ io.on('connection', (socket) => {
       }
     });
     if (released.length > 0) {
-      guardarDatos();
       io.emit('SEATS_RELEASED', { seatIds: released });
     }
   });
 });
 
-// Escuchar explícitamente en '0.0.0.0' para contenedores de Railway
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`
   ========================================================================
-  🚀 OpenTheDoor - Servidor de Boletería Activo
+  🚀 OpenTheDoor - Servidor con PostgreSQL Conectado
   ========================================================================
   📍 Puerto Activo:     ${PORT}
   📍 Bind Address:      0.0.0.0
   📍 Evento Único:      ${EVENT_INFO.title} (Aforo: ${TOTAL_CAPACITY} puestos)
-  📍 Validación:        Control estricto por Puertas (1-VIP, 2-Gold, 3-Silver)
-  📍 Persistencia:      ${DATA_FILE}
+  📍 Base de Datos:     PostgreSQL (Railway Tokaido Proxy)
   ========================================================================
   `);
 });
