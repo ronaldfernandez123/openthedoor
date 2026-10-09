@@ -26,11 +26,7 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 const DATA_FILE = path.join(DATA_DIR, 'data.json');
-const path = require('path');
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
 // --- CONFIGURACIÓN DEL EVENTO ÚNICO (600 PUESTOS / 60 MESAS) ---
 const TOTAL_CAPACITY = 600;
 const LOCK_TIME_MS = 5 * 60 * 1000; // 5 Minutos (Temporizador de Reserva)
@@ -212,7 +208,7 @@ function isAdmin(socket) {
   return socket.data.admin === true;
 }
 
-// --- MIDDLEWARES & ARCHIVOS ESTÁTICOS (SIN CACHÉ PARA ACTUALIZACIONES INMEDIATAS) ---
+// --- MIDDLEWARES & ARCHIVOS ESTÁTICOS ---
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -233,7 +229,11 @@ app.use(express.static(__dirname, {
   }
 }));
 
-// --- REST API ENDPOINTS ---
+// --- RUTAS PRINCIPALES ---
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.get('/api/health', (req, res) => {
   const soldCount = Object.values(seatsState).filter(s => s.status === 'sold').length;
   res.json({
@@ -274,7 +274,6 @@ app.post('/api/reset', (req, res) => {
 io.on('connection', (socket) => {
   console.log(`🔌 Cliente conectado: ${socket.id}`);
 
-  // Enviar estado inicial
   socket.emit('MAP_STATE', seatsState);
   socket.emit('EVENT_INFO', EVENT_INFO);
 
@@ -343,7 +342,6 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Validar que el cliente tenga las sillas bloqueadas y vigentes
     const valid = seatIds.every(id => {
       const s = seatsState[id];
       return s && s.status === 'locked' && s.userId === socket.id;
@@ -356,7 +354,6 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Marcar como vendidas
     seatIds.forEach(seatId => {
       if (activeTimers[seatId]) {
         clearTimeout(activeTimers[seatId]);
@@ -365,7 +362,6 @@ io.on('connection', (socket) => {
       seatsState[seatId] = { status: 'sold', buyer: datosCompra.cliente };
     });
 
-    // Calcular Zonas y Puerta Asignada oficial
     const seatZones = [...new Set(seatIds.map(id => getSeatZone(id)))];
     const primaryZone = seatZones[0] || 'SILVER';
     const doorInfo = getZoneDoorInfo(primaryZone);
@@ -559,16 +555,13 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Identificar zonas de los puestos de la entrada
     const ticketZones = venta.zonas || [...new Set((venta.puestos || []).map(id => getSeatZone(id)))];
     const correctDoor = venta.puertaSugerida || getZoneDoorInfo(ticketZones[0] || 'SILVER').door;
     const zonaNombre = venta.zonaNombre || getZoneDoorInfo(ticketZones[0] || 'SILVER').name;
 
-    // A. Verificación de Administrador (Acceso Total a Cualquier Puerta)
     const socketIsAdmin = isAdmin(socket) || isRoleAdmin === true;
 
     if (!socketIsAdmin) {
-      // B. Verificación de Validador Staff por Puerta Asignada
       const staff = staffUsers.find(s => s.username === staffUsername) || { door: "Puerta Asignada", allowedZones: [] };
       let allowedZones = staff.allowedZones || [];
 
@@ -583,7 +576,6 @@ io.on('connection', (socket) => {
       const hasAccess = allowedZones.includes('ALL') || ticketZones.some(z => allowedZones.includes(z));
 
       if (!hasAccess) {
-        // 🚫 DENEGAR POR PUERTA INCORRECTA
         socket.emit('VALIDATION_RESULT', {
           status: 'WRONG_DOOR',
           message: '🚫 ¡ACCESO DENEGADO EN ESTA PUERTA!',
@@ -597,7 +589,6 @@ io.on('connection', (socket) => {
       }
     }
 
-    // C. Si la puerta es correcta (o es Admin): Verificar si ya fue utilizada
     if (venta.usado) {
       socket.emit('VALIDATION_RESULT', {
         status: 'USED',
@@ -608,7 +599,6 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // D. Entrada Válida -> Marcar como Usada
     venta.usado = true;
     venta.escaneadoPor = socketIsAdmin ? 'Administrador (Pase Total)' : `${staffUsername || 'Validador Oficial'}`;
     venta.fechaEscaneo = new Date().toLocaleString('es-CO');
