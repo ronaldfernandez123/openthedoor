@@ -13,10 +13,10 @@ const SOCKET_SERVER_URL = isLocal ? 'openthedoor-production.up.railway.app' : RA
 
 // Inicialización global de Socket.IO
 const socket = io(SOCKET_SERVER_URL, {
-  transports: ['websocket', 'polling'],
+  transports: [ 'polling','websocket'],
   autoConnect: true,
   reconnection: true,
-  reconnectionAttempts: 10,
+  reconnectionAttempts: 20,
   reconnectionDelay: 1000
 });
 
