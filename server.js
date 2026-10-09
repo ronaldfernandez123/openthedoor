@@ -14,16 +14,18 @@ const { Server } = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
-// Configuración estricta de CORS para Socket.IO (Permite conexión desde Vercel)
+// Configuración de CORS y Socket.IO óptima para Railway + Vercel
 const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
-  }
+  },
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -211,7 +213,7 @@ function isAdmin(socket) {
   return socket.data.admin === true;
 }
 
-// --- MIDDLEWARES (Habilitar CORS global) ---
+// --- MIDDLEWARES & ARCHIVOS ESTÁTICOS ---
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
@@ -224,7 +226,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Servir archivos estáticos si existen
+// Servir archivos estáticos si existen localmente
 const indexPath = path.join(__dirname, 'index.html');
 app.use(express.static(__dirname, {
   etag: false,
@@ -644,12 +646,14 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
+// Escuchar explícitamente en '0.0.0.0' para contenedores de Railway
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`
   ========================================================================
   🚀 OpenTheDoor - Servidor de Boletería Activo
   ========================================================================
   📍 Puerto Activo:     ${PORT}
+  📍 Bind Address:      0.0.0.0
   📍 Evento Único:      ${EVENT_INFO.title} (Aforo: ${TOTAL_CAPACITY} puestos)
   📍 Validación:        Control estricto por Puertas (1-VIP, 2-Gold, 3-Silver)
   📍 Persistencia:      ${DATA_FILE}
