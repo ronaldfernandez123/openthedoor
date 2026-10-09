@@ -26,7 +26,11 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 const DATA_FILE = path.join(DATA_DIR, 'data.json');
+const path = require('path');
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 // --- CONFIGURACIÓN DEL EVENTO ÚNICO (600 PUESTOS / 60 MESAS) ---
 const TOTAL_CAPACITY = 600;
 const LOCK_TIME_MS = 5 * 60 * 1000; // 5 Minutos (Temporizador de Reserva)
