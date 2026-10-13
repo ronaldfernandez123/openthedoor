@@ -342,31 +342,24 @@ class TicketController {
 
   // --- ACORDEÓN DE ZONAS (SAHARA, OASIS, NOMAD) ---
   handleToggleZone(selectedZone) {
-    this.activeZone = selectedZone.toUpperCase();
-    const zones = ['sahara', 'oasis', 'nomad'];
+    const z = (selectedZone || 'sahara').toLowerCase();
+    this.activeZone = z.toUpperCase();
 
-    zones.forEach(z => {
-      const content = document.getElementById(`zone-content-${z}`);
-      const header = document.getElementById(`zone-header-${z}`);
-      const icon = document.getElementById(`zone-icon-${z}`);
+    const content = document.getElementById(`zone-content-${z}`);
+    const header = document.getElementById(`zone-header-${z}`);
+    const icon = document.getElementById(`zone-icon-${z}`);
+    if (!content) return;
 
-      if (z === selectedZone.toLowerCase()) {
-        const isClosed = content.classList.contains('hidden');
-        if (isClosed) {
-          content.classList.remove('hidden');
-          if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
-          if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
-        } else {
-          content.classList.add('hidden');
-          if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
-          if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
-        }
-      } else {
-        content.classList.add('hidden');
-        if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
-        if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
-      }
-    });
+    const isClosed = content.classList.contains('hidden');
+    if (isClosed) {
+      content.classList.remove('hidden');
+      if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
+      if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
+    } else {
+      content.classList.add('hidden');
+      if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
+      if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
+    }
   }
 
   // --- REDIRECCIÓN Y APERTURA DE ZONA DESDE LAS TARJETAS DE PRECIOS (IMAGEN 1) ---
@@ -382,27 +375,18 @@ class TicketController {
     // Asegurar que el mapa de organización de mesas esté desplegado
     this.handleEnsureMapOpen();
 
-    // Asegurarse de abrir la zona seleccionada en el acordeón del mapa
-    const zones = ['sahara', 'oasis', 'nomad'];
-    zones.forEach(zoneKey => {
-      const content = document.getElementById(`zone-content-${zoneKey}`);
-      const header = document.getElementById(`zone-header-${zoneKey}`);
-      const icon = document.getElementById(`zone-icon-${zoneKey}`);
-      if (zoneKey === z) {
-        if (content) content.classList.remove('hidden');
-        if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
-        if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
-      } else {
-        if (content) content.classList.add('hidden');
-        if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
-        if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
-      }
-    });
+    // Asegurarse de abrir la zona seleccionada en el mapa
+    const content = document.getElementById(`zone-content-${z}`);
+    const header = document.getElementById(`zone-header-${z}`);
+    const icon = document.getElementById(`zone-icon-${z}`);
+    if (content) content.classList.remove('hidden');
+    if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
+    if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
 
     // Scroll suave hacia el encabezado de la zona
     const zoneHeader = document.getElementById(`zone-header-${z}`);
     if (zoneHeader) {
-      zoneHeader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      zoneHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       this.handleNavToSection('mapa-reserva');
     }
@@ -608,10 +592,11 @@ class TicketController {
     if (this.timerInterval) clearInterval(this.timerInterval);
 
     this.timerInterval = setInterval(() => {
-      if (this.model.lockExpiresAt && this.model.mySelectedSeats.length > 0) {
+      const hasSeats = this.model.mySelectedSeats && this.model.mySelectedSeats.length > 0;
+      if (this.model.lockExpiresAt && hasSeats) {
         const remainingMs = Math.max(0, this.model.lockExpiresAt - Date.now());
         const remainingSec = Math.floor(remainingMs / 1000);
-        this.view.updateTimerDisplay(remainingSec);
+        this.view.updateTimerDisplay(remainingSec, true);
 
         if (remainingSec <= 0) {
           this.view.showToast("⏱️ El tiempo de reserva (5 min) ha finalizado. Las sillas han sido liberadas.", "warning");
@@ -620,7 +605,7 @@ class TicketController {
           this.renderAll();
         }
       } else {
-        this.view.updateTimerDisplay(0);
+        this.view.updateTimerDisplay(null, false);
       }
     }, 1000);
   }
