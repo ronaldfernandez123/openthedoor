@@ -46,70 +46,73 @@ const TOTAL_CAPACITY = 600;
 const LOCK_TIME_MS = 5 * 60 * 1000; // 5 Minutos
 
 const EVENT_INFO = {
-  id: "EVT-OPENDOOR-01",
-  title: "Gran Gala & Concierto Exclusivo - Reserva de Mesas",
-  date: "2026-11-28T20:00",
-  venue: "Gran Salón Real & Arena 360°",
-  address: "Centro de Convenciones & Eventos Metropolitan, Bogotá",
+  id: "EVT-CARTAGENAPLAZA-2026",
+  title: "Cena San Silvestre 2026 - Hotel Cartagena Plaza",
+  date: "2026-12-31T20:00",
+  venue: "Playa del Hotel Cartagena Plaza",
+  address: "Cartagena de Indias D.T. y C. - RNT 5286",
   image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80",
-  category: "Concierto & Gala",
+  category: "Cena San Silvestre & Fiesta de Fin de Año",
   totalCapacity: TOTAL_CAPACITY,
-  minAge: "+18 años",
-  doorsOpen: "18:30 hs",
-  parking: "Parqueadero privado con servicio de valet parking",
-  announcement: "Apertura de puertas a las 18:30 hs. Presentar comprobante digital con código QR para validación por cámara en puerta asignada.",
+  minAge: "Adulto: 12+ años | Niño: 4 a 11 años",
+  doorsOpen: "19:00 hs",
+  parking: "Parqueadero privado con servicio del Hotel Cartagena Plaza",
+  announcement: "Apertura de puertas a las 19:00 hs. Presentar comprobante digital con código QR para validación por cámara en puerta asignada.",
   zones: {
-    DIAMOND: {
-      name: "Zona Diamond",
-      price: 100000,
+    SAHARA: {
+      name: "Zona Sahara",
+      price: 1050000,
+      childPrice: 420000,
       start: 'A',
       end: 'B',
       tablesPerLetter: 5,
       seatsPerTable: 10,
       totalSeats: 100,
-      color: "indigo",
-      door: "Puerta 1 - Acceso VIP & Diamond"
+      color: "amber",
+      door: "Puerta 1 - Acceso VIP Sahara"
     },
-    GOLD: {
-      name: "Zona Gold",
-      price: 70000,
+    OASIS: {
+      name: "Zona Oasis",
+      price: 950000,
+      childPrice: 420000,
       start: 'C',
       end: 'H',
       tablesPerLetter: 5,
       seatsPerTable: 10,
       totalSeats: 300,
-      color: "amber",
-      door: "Puerta 2 - Acceso Preferencial Gold"
+      color: "rose",
+      door: "Puerta 2 - Acceso Preferencial Oasis"
     },
-    SILVER: {
-      name: "Zona Silver",
-      price: 40000,
+    NOMAD: {
+      name: "Zona Nomad",
+      price: 850000,
+      childPrice: 420000,
       start: 'I',
       end: 'L',
       tablesPerLetter: 5,
       seatsPerTable: 10,
       totalSeats: 200,
-      color: "slate",
-      door: "Puerta 3 - Acceso General Silver"
+      color: "yellow",
+      door: "Puerta 3 - Acceso General Nomad"
     }
   }
 };
 
 function getSeatZone(seatId) {
-  if (!seatId) return 'SILVER';
+  if (!seatId) return 'NOMAD';
   const letter = seatId.charAt(0).toUpperCase();
-  if (letter >= 'A' && letter <= 'B') return 'DIAMOND';
-  if (letter >= 'C' && letter <= 'H') return 'GOLD';
-  return 'SILVER';
+  if (letter >= 'A' && letter <= 'B') return 'SAHARA';
+  if (letter >= 'C' && letter <= 'H') return 'OASIS';
+  return 'NOMAD';
 }
 
 function getZoneDoorInfo(zoneKey) {
   const mapping = {
-    DIAMOND: { door: "Puerta 1 - Acceso VIP & Diamond", name: "Zona Diamond VIP", color: "indigo" },
-    GOLD: { door: "Puerta 2 - Acceso Preferencial Gold", name: "Zona Gold Preferencial", color: "amber" },
-    SILVER: { door: "Puerta 3 - Acceso General Silver", name: "Zona Silver General", color: "slate" }
+    SAHARA: { door: "Puerta 1 - Acceso VIP Sahara", name: "Zona Sahara VIP", color: "amber" },
+    OASIS: { door: "Puerta 2 - Acceso Preferencial Oasis", name: "Zona Oasis Preferencial", color: "rose" },
+    NOMAD: { door: "Puerta 3 - Acceso General Nomad", name: "Zona Nomad General", color: "yellow" }
   };
-  return mapping[zoneKey] || mapping.SILVER;
+  return mapping[zoneKey] || mapping.NOMAD;
 }
 
 // --- CREDENCIALES DE ADMINISTRADORES ---
@@ -171,9 +174,9 @@ async function initDb() {
     const staffRes = await pool.query('SELECT COUNT(*) FROM staff_users');
     if (parseInt(staffRes.rows[0].count) === 0) {
       const initialStaff = [
-        { id: "STF-001", nombre: "Mateo", apellido: "Rivas", username: "puerta1", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", door: "Puerta 1 - Acceso VIP & Diamond", allowedZones: JSON.stringify(["DIAMOND"]), fechaCreacion: "08/10/2026" },
-        { id: "STF-002", nombre: "Laura", apellido: "Castro", username: "puerta2", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80", door: "Puerta 2 - Acceso Preferencial Gold", allowedZones: JSON.stringify(["GOLD"]), fechaCreacion: "08/10/2026" },
-        { id: "STF-003", nombre: "Julián", apellido: "Pérez", username: "puerta3", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80", door: "Puerta 3 - Acceso General Silver", allowedZones: JSON.stringify(["SILVER"]), fechaCreacion: "08/10/2026" }
+        { id: "STF-001", nombre: "Mateo", apellido: "Rivas", username: "puerta1", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80", door: "Puerta 1 - Acceso VIP Sahara", allowedZones: JSON.stringify(["SAHARA"]), fechaCreacion: "08/10/2026" },
+        { id: "STF-002", nombre: "Laura", apellido: "Castro", username: "puerta2", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80", door: "Puerta 2 - Acceso Preferencial Oasis", allowedZones: JSON.stringify(["OASIS"]), fechaCreacion: "08/10/2026" },
+        { id: "STF-003", nombre: "Julián", apellido: "Pérez", username: "puerta3", password: "puerta123password", avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80", door: "Puerta 3 - Acceso General Nomad", allowedZones: JSON.stringify(["NOMAD"]), fechaCreacion: "08/10/2026" }
       ];
 
       for (const st of initialStaff) {
@@ -284,7 +287,7 @@ app.get('/', (req, res) => {
   } else {
     res.json({
       status: 'online',
-      message: 'Servidor Backend de OpenTheDoor activo en Railway con PostgreSQL',
+      message: 'Servidor Backend de Cena San Silvestre 2026 - Hotel Cartagena Plaza activo',
       health: '/api/health'
     });
   }
@@ -295,7 +298,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     database: 'PostgreSQL Conectado',
-    project: 'OpenTheDoor',
+    project: 'Cena San Silvestre 2026 - Hotel Cartagena Plaza',
     version: '2.0.0',
     eventName: EVENT_INFO.title,
     totalCapacity: TOTAL_CAPACITY,
@@ -419,7 +422,7 @@ io.on('connection', (socket) => {
     });
 
     const seatZones = [...new Set(seatIds.map(id => getSeatZone(id)))];
-    const primaryZone = seatZones[0] || 'SILVER';
+    const primaryZone = seatZones[0] || 'NOMAD';
     const doorInfo = getZoneDoorInfo(primaryZone);
 
     const nuevaVenta = {
@@ -430,6 +433,7 @@ io.on('connection', (socket) => {
       telefono: datosCompra.telefono || "",
       numEntradas: seatIds.length,
       puestos: seatIds,
+      puestosDetalles: datosCompra.puestosDetalles || [],
       zonas: seatZones,
       zonaNombre: doorInfo.name,
       puertaSugerida: doorInfo.door,
@@ -554,9 +558,9 @@ io.on('connection', (socket) => {
     let allowedZones = Array.isArray(staffData.allowedZones) ? staffData.allowedZones : [];
     if (allowedZones.length === 0) {
       const doorLower = (staffData.door || '').toLowerCase();
-      if (doorLower.includes('diamond') || doorLower.includes('1') || doorLower.includes('vip')) allowedZones = ['DIAMOND'];
-      else if (doorLower.includes('gold') || doorLower.includes('2')) allowedZones = ['GOLD'];
-      else if (doorLower.includes('silver') || doorLower.includes('3')) allowedZones = ['SILVER'];
+      if (doorLower.includes('sahara') || doorLower.includes('1') || doorLower.includes('vip')) allowedZones = ['SAHARA'];
+      else if (doorLower.includes('oasis') || doorLower.includes('2') || doorLower.includes('preferencial')) allowedZones = ['OASIS'];
+      else if (doorLower.includes('nomad') || doorLower.includes('3') || doorLower.includes('general')) allowedZones = ['NOMAD'];
       else allowedZones = ['ALL'];
     }
 
@@ -566,7 +570,7 @@ io.on('connection', (socket) => {
       apellido: staffData.apellido,
       username: staffData.username,
       password: staffData.password,
-      door: staffData.door || "Puerta 1 - Acceso VIP & Diamond",
+      door: staffData.door || "Puerta 1 - Acceso VIP Sahara",
       allowedZones,
       avatar: staffData.avatar || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80",
       fechaCreacion: new Date().toLocaleDateString('es-CO')

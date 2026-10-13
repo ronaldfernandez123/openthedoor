@@ -21,16 +21,19 @@ window.addEventListener('DOMContentLoaded', () => {
   // Iniciar ciclo de vida del controlador
   appController.init();
 
-  // Registro del Service Worker para PWA & soporte offline
+  // Limpieza de Service Workers y Caches antiguos para garantizar recarga de cambios en tiempo real
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => {
-          console.log('[PWA] Service Worker registrado exitosamente con alcance:', reg.scope);
-        })
-        .catch((err) => {
-          console.warn('[PWA] Error al registrar Service Worker:', err);
-        });
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const reg of registrations) {
+        reg.unregister();
+      }
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      for (const name of names) {
+        caches.delete(name);
+      }
     });
   }
 });

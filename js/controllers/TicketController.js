@@ -6,12 +6,17 @@ class TicketController {
   constructor(model, view) {
     this.model = model;
     this.view = view;
-    this.activeZone = 'DIAMOND';
+    this.activeZone = 'SAHARA';
     this.timerInterval = null;
     this.html5QrCode = null;
     this.selectedStaffAvatarDataUrl = null;
     this.selectedUserAvatarDataUrl = null;
     this.lastConfirmedPurchase = null;
+    this.pendingSeatSelection = null;
+    this.pendingTableSelection = null;
+    this.html5QrEngine = null;
+    this.isCameraScanning = false;
+    this.cameraFacingMode = "environment";
   }
 
   init() {
@@ -56,7 +61,7 @@ class TicketController {
 
     // 2. Mi selección modificada
     this.model.on('mySelectionChanged', ({ seats, expiresAt }) => {
-      this.view.renderSelectionSidebar(seats, (id) => this.model.getSeatPrice(id), expiresAt);
+      this.view.renderSelectionSidebar(seats, (id, type) => this.model.getSeatPrice(id, type), expiresAt, (id) => this.model.getSeatType(id));
       this.renderTableMap();
     });
 
@@ -86,7 +91,13 @@ class TicketController {
     });
 
     this.model.on('adminDataUpdated', (data) => {
-      this.view.renderAdminPanel(data);
+      this.view.renderAdminPanel(data, this.model.currentStage, this.model.isAutoStage);
+    });
+
+    this.model.on('stageChanged', () => {
+      this.updateActiveStageUI();
+      this.renderTableMap();
+      this.view.renderAdminPanel(this.model.adminData, this.model.currentStage, this.model.isAutoStage);
     });
 
     this.model.on('adminSessionInvalid', () => {
@@ -125,6 +136,21 @@ class TicketController {
     // 8. Usuario normal
     this.model.on('userChanged', (user) => {
       this.view.renderHeaderUser(user, this.model.currentAdmin, this.model.currentStaff);
+      if (user) {
+        if (this.pendingSeatSelection) {
+          const seatToReserve = this.pendingSeatSelection;
+          this.pendingSeatSelection = null;
+          setTimeout(() => {
+            this.handleToggleSeat(seatToReserve);
+          }, 300);
+        } else if (this.pendingTableSelection) {
+          const tableToReserve = this.pendingTableSelection;
+          this.pendingTableSelection = null;
+          setTimeout(() => {
+            this.handleBuyFullTable(tableToReserve);
+          }, 300);
+        }
+      }
     });
   }
 
@@ -132,16 +158,23 @@ class TicketController {
   renderAll() {
     this.view.renderHeaderUser(this.model.currentUser, this.model.currentAdmin, this.model.currentStaff);
     this.renderTableMap();
+    this.updateActiveStageUI();
     this.view.renderSelectionSidebar(
       this.model.mySelectedSeats,
-      (id) => this.model.getSeatPrice(id),
-      this.model.lockExpiresAt
+      (id, type) => this.model.getSeatPrice(id, type),
+      this.model.lockExpiresAt,
+      (id) => this.model.getSeatType(id)
     );
+    if (this.model.currentAdmin) {
+      this.view.renderAdminPanel(this.model.adminData, this.model.currentStage, this.model.isAutoStage);
+    }
   }
 
   renderTableMap() {
     const socketId = this.model.socket ? this.model.socket.id : null;
-    const zones = this.model.eventInfo.zones || EVENT_CONFIG.zones;
+    const zones = (this.model.eventInfo && this.model.eventInfo.zones && this.model.eventInfo.zones.SAHARA)
+      ? this.model.eventInfo.zones
+      : EVENT_CONFIG.zones;
 
     Object.keys(zones).forEach(zoneKey => {
       this.view.renderTableGrid(
@@ -173,6 +206,16 @@ class TicketController {
       }
     });
 
+    // Controlar visibilidad del botón flotante para volver a Admin
+    const floatBar = document.getElementById('admin-floating-bar');
+    if (floatBar) {
+      if (this.model.currentAdmin && viewName !== 'admin') {
+        floatBar.classList.remove('hidden');
+      } else {
+        floatBar.classList.add('hidden');
+      }
+    }
+
     if (viewName === 'my-tickets') {
       if (!this.model.currentUser) {
         this.handleOpenAuthModal('login');
@@ -182,17 +225,78 @@ class TicketController {
     } else if (viewName === 'staff') {
       this.initScanner();
     } else {
-      if (this.html5QrCode) {
-        try { this.html5QrCode.stop(); } catch (e) {}
+      if (this.isCameraScanning) {
+        this.handleStopCameraScan();
       }
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // --- ACORDEÓN DE ZONAS ---
+  // --- NAVEGACIÓN INTELIGENTE A SECCIONES (DESDE ADMIN, CLIENTE O CUALQUIER VISTA) ---
+  handleNavToSection(sectionId, event) {
+    if (event) {
+      event.preventDefault();
+    }
+
+    const clientView = document.getElementById('view-client');
+    const wasHidden = clientView && clientView.classList.contains('hidden');
+
+    if (wasHidden) {
+      // Activar vista cliente
+      const views = {
+        client: document.getElementById('view-client'),
+        'my-tickets': document.getElementById('view-my-tickets'),
+        admin: document.getElementById('view-admin'),
+        staff: document.getElementById('view-staff')
+      };
+      Object.keys(views).forEach(k => {
+        if (views[k]) {
+          if (k === 'client') views[k].classList.remove('hidden');
+          else views[k].classList.add('hidden');
+        }
+      });
+
+      const floatBar = document.getElementById('admin-floating-bar');
+      if (floatBar && this.model.currentAdmin) {
+        floatBar.classList.remove('hidden');
+      }
+    }
+
+    const performScroll = () => {
+      if (sectionId === 'hero' || sectionId === 'top') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        history.pushState(null, null, '#hero');
+        return;
+      }
+
+      // Si se selecciona 'zones' o 'mapa-reserva', asegurar que la zona esté visible
+      if (sectionId === 'zones' || sectionId === 'mapa-reserva') {
+        const saharaContent = document.getElementById('zone-content-sahara');
+        if (saharaContent && saharaContent.classList.contains('hidden')) {
+          this.handleToggleZone('sahara');
+        }
+      }
+
+      const target = document.getElementById(sectionId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, null, `#${sectionId}`);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    if (wasHidden) {
+      setTimeout(performScroll, 70);
+    } else {
+      performScroll();
+    }
+  }
+
+  // --- ACORDEÓN DE ZONAS (SAHARA, OASIS, NOMAD) ---
   handleToggleZone(selectedZone) {
     this.activeZone = selectedZone.toUpperCase();
-    const zones = ['diamond', 'gold', 'silver'];
+    const zones = ['sahara', 'oasis', 'nomad'];
 
     zones.forEach(z => {
       const content = document.getElementById(`zone-content-${z}`);
@@ -204,42 +308,192 @@ class TicketController {
         if (isClosed) {
           content.classList.remove('hidden');
           if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
-          if (header) header.classList.add('bg-slate-100', 'dark:bg-slate-700/80');
+          if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
         } else {
           content.classList.add('hidden');
           if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
-          if (header) header.classList.remove('bg-slate-100', 'dark:bg-slate-700/80');
+          if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
         }
       } else {
         content.classList.add('hidden');
         if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
-        if (header) header.classList.remove('bg-slate-100', 'dark:bg-slate-700/80');
+        if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
       }
     });
   }
 
-  // --- INTERACCIÓN CON SILLAS & MESAS ---
+  // --- INTERACCIÓN CON SILLAS & MESAS (PANTALLA EMERGENTE ADULTO / NIÑO) ---
   handleToggleSeat(seatId) {
+    // Si no ha iniciado sesión, exigir inicio de sesión inmediato
     if (!this.model.currentUser && !this.model.currentAdmin) {
-      this.view.showToast("Inicia sesión o regístrate para seleccionar tus sillas.", "info");
+      this.pendingSeatSelection = seatId;
+      this.view.showToast("Debes iniciar sesión para seleccionar y comprar tus sillas.", "warning");
       this.handleOpenAuthModal('login');
       return;
     }
 
-    const res = this.model.toggleSeat(seatId);
+    // Si ya está seleccionado por el usuario, liberarlo / quitarlo
+    if (this.model.mySelectedSeats.includes(seatId)) {
+      const res = this.model.toggleSeat(seatId);
+      if (res.success) {
+        this.view.showToast(`Puesto ${seatId} liberado.`, "info");
+      }
+      return;
+    }
+
+    const state = this.model.seatsState[seatId];
+    if (state && (state.status === 'sold' || (state.status === 'locked' && (!this.model.socket || state.userId !== this.model.socket.id)))) {
+      this.view.showToast("Este puesto ya no está disponible.", "warning");
+      return;
+    }
+
+    // Abrir pantalla emergente para seleccionar si es Niño o Adulto
+    this.handleOpenSeatTypeModal(seatId);
+  }
+
+  handleOpenSeatTypeModal(seatId) {
+    if (!this.model.currentUser && !this.model.currentAdmin) {
+      this.pendingSeatSelection = seatId;
+      this.view.showToast("Debes iniciar sesión para seleccionar tus puestos.", "warning");
+      this.handleOpenAuthModal('login');
+      return;
+    }
+
+    const zoneKey = this.model.getZoneBySeatId(seatId);
+    const zoneConfig = EVENT_CONFIG.zones[zoneKey] || { name: `Zona ${zoneKey}`, badgeColor: 'bg-amber-500 text-slate-900' };
+    const priceAdult = this.model.getSeatPrice(seatId, 'ADULTO');
+    const priceChild = this.model.getSeatPrice(seatId, 'NINO');
+    const currentType = this.model.getSeatType(seatId);
+
+    const stagesNames = {
+      PREVENTA: "Preventa (Hasta 15 Oct)",
+      ETAPA_2: "Etapa 2 (16-30 Nov)",
+      FULL: "Precio Full (Desde 1 Dic)"
+    };
+    const stageName = stagesNames[this.model.currentStage] || "Preventa";
+
+    this.view.openSeatTypeModal({
+      seatId,
+      zoneName: zoneConfig.name,
+      badgeClass: zoneConfig.badgeColor,
+      stageName,
+      priceAdult,
+      priceChild,
+      currentType,
+      onSelect: (id, type) => this.handleSelectSeatType(id, type)
+    });
+  }
+
+  handleSelectSeatType(seatId, type) {
+    if (!this.model.currentUser && !this.model.currentAdmin) {
+      this.pendingSeatSelection = seatId;
+      this.view.showToast("Debes iniciar sesión para seleccionar tus puestos.", "warning");
+      this.handleOpenAuthModal('login');
+      return;
+    }
+
+    if (this.model.mySelectedSeats.includes(seatId)) {
+      this.model.setSeatType(seatId, type);
+      this.view.showToast(`Puesto ${seatId} actualizado a ${type === 'NINO' ? 'Niño (4-11 años)' : 'Adulto'}.`, "info");
+      return;
+    }
+
+    const res = this.model.toggleSeat(seatId, type);
     if (!res.success) {
       this.view.showToast(res.message, "warning");
+    } else {
+      this.view.showToast(`Puesto ${seatId} seleccionado como ${type === 'NINO' ? 'Niño (4-11 años)' : 'Adulto'}.`, "success");
+    }
+  }
+
+  handleSetStage(stageId) {
+    this.model.setStage(stageId);
+    const stagesNames = {
+      AUTO: "Automático según fecha del calendario",
+      PREVENTA: "Preventa (Hasta 15 Oct)",
+      ETAPA_2: "Etapa 2 (16-30 Nov)",
+      FULL: "Precio Full (Desde 1 Dic)"
+    };
+    this.view.showToast(`Tarifas cambiadas a: ${stagesNames[stageId] || stageId}`, "info");
+    this.updateActiveStageUI();
+  }
+
+  handleAdminChangeStage(stageMode) {
+    this.model.setStage(stageMode);
+    const names = {
+      AUTO: "Automático según fecha del calendario",
+      PREVENTA: "Preventa (Hasta 15 Oct)",
+      ETAPA_2: "Etapa 2 (16-30 Nov)",
+      FULL: "Precio Full (Desde 1 Dic)"
+    };
+    this.view.showToast(`Tarifas actualizadas en todo el sistema: ${names[stageMode] || stageMode}`, "info");
+    this.updateActiveStageUI();
+    this.view.renderAdminPanel(this.model.adminData, this.model.currentStage, this.model.isAutoStage);
+  }
+
+  updateActiveStageUI() {
+    const stage = this.model.currentStage;
+    const isAuto = this.model.isAutoStage;
+    const stageInfo = (typeof PRICING_STAGES !== 'undefined' && PRICING_STAGES[stage]) 
+      ? PRICING_STAGES[stage] 
+      : { name: 'Preventa', tagline: 'Hasta 15 Oct' };
+
+    // 1. Badge de etapa en Hero
+    const stageBadge = document.getElementById('current-stage-badge');
+    if (stageBadge) {
+      const colorBg = stage === 'PREVENTA' ? 'bg-amber-500 text-slate-950' : (stage === 'ETAPA_2' ? 'bg-orange-500 text-white' : 'bg-red-600 text-white');
+      stageBadge.innerHTML = `
+        <div class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-2xl ${colorBg} font-black text-xs shadow-lg">
+          <i class="fa-solid fa-tag"></i>
+          <span>${stageInfo.name.toUpperCase()} (${stageInfo.tagline})</span>
+          ${isAuto ? '<span class="text-[9px] uppercase tracking-wider bg-black/25 px-1.5 py-0.5 rounded-full font-bold ml-0.5">Automático</span>' : '<span class="text-[9px] uppercase tracking-wider bg-black/25 px-1.5 py-0.5 rounded-full font-bold ml-0.5">Manual</span>'}
+        </div>
+      `;
+    }
+
+    // 2. Columnas en la tabla de precios
+    ['PREVENTA', 'ETAPA_2', 'FULL'].forEach(s => {
+      const colTh = document.getElementById(`th-col-${s.toLowerCase()}`);
+      if (colTh) {
+        if (s === stage) {
+          colTh.className = "py-4 px-4 font-black uppercase tracking-wider text-xs bg-amber-500/30 text-amber-300 ring-2 ring-amber-400";
+        } else {
+          colTh.className = "py-4 px-4 font-black uppercase tracking-wider text-xs text-slate-400";
+        }
+      }
+    });
+
+    // 3. Precios en cabeceras de acordeón
+    const priceSahara = document.getElementById('price-header-sahara');
+    const priceOasis = document.getElementById('price-header-oasis');
+    const priceNomad = document.getElementById('price-header-nomad');
+
+    if (priceSahara) {
+      const a = this.model.getSeatPrice('A1-S1', 'ADULTO');
+      const n = this.model.getSeatPrice('A1-S1', 'NINO');
+      priceSahara.textContent = `Adulto: $${a.toLocaleString('es-CO')} | Niño: $${n.toLocaleString('es-CO')}`;
+    }
+    if (priceOasis) {
+      const a = this.model.getSeatPrice('C1-S1', 'ADULTO');
+      const n = this.model.getSeatPrice('C1-S1', 'NINO');
+      priceOasis.textContent = `Adulto: $${a.toLocaleString('es-CO')} | Niño: $${n.toLocaleString('es-CO')}`;
+    }
+    if (priceNomad) {
+      const a = this.model.getSeatPrice('I1-S1', 'ADULTO');
+      const n = this.model.getSeatPrice('I1-S1', 'NINO');
+      priceNomad.textContent = `Adulto: $${a.toLocaleString('es-CO')} | Niño: $${n.toLocaleString('es-CO')}`;
     }
   }
 
   handleBuyFullTable(tableId) {
     if (!this.model.currentUser && !this.model.currentAdmin) {
-      this.view.showToast("Inicia sesión para reservar la mesa completa.", "info");
+      this.pendingTableSelection = tableId;
+      this.view.showToast("Inicia sesión o regístrate para reservar la mesa completa.", "warning");
       this.handleOpenAuthModal('login');
       return;
     }
 
-    const res = this.model.selectFullTable(tableId);
+    const res = this.model.selectFullTable(tableId, 'ADULTO');
     if (res.success) {
       this.view.showToast(res.message, "success");
     } else {
@@ -269,15 +523,15 @@ class TicketController {
     }, 1000);
   }
 
-  // --- MODAL DE CHECKOUT & PAGO ---
   handleStartCheckout() {
-    if (this.model.mySelectedSeats.length === 0) {
-      this.view.showToast("No has seleccionado ninguna silla aún.", "warning");
+    if (!this.model.currentUser && !this.model.currentAdmin) {
+      this.view.showToast("Debes iniciar sesión para completar la compra de tus entradas.", "warning");
+      this.handleOpenAuthModal('login');
       return;
     }
 
-    if (!this.model.currentUser && !this.model.currentAdmin) {
-      this.handleOpenAuthModal('login');
+    if (this.model.mySelectedSeats.length === 0) {
+      this.view.showToast("No has seleccionado ninguna silla aún.", "warning");
       return;
     }
 
@@ -285,10 +539,15 @@ class TicketController {
     if (!modal) return;
 
     const total = this.model.getSelectionTotal();
-    const user = this.model.currentUser || { name: this.model.currentAdmin.name || "Administrador", email: "admin@openthedoor.com" };
+    const user = this.model.currentUser || { name: (this.model.currentAdmin ? this.model.currentAdmin.name : ""), email: "" };
+
+    const breakdownList = this.model.mySelectedSeats.map(id => {
+      const type = this.model.getSeatType(id);
+      return `${id} (${type === 'NINO' ? 'Niño' : 'Adulto'})`;
+    }).join(', ');
 
     document.getElementById('checkoutTotalBadge').textContent = `$${total.toLocaleString('es-CO')} COP`;
-    document.getElementById('checkoutSeatsList').textContent = this.model.mySelectedSeats.join(', ');
+    document.getElementById('checkoutSeatsList').textContent = breakdownList;
     document.getElementById('checkoutBuyerName').value = user.name || "";
     document.getElementById('checkoutBuyerEmail').value = user.email || "";
 
@@ -306,6 +565,11 @@ class TicketController {
 
   handleConfirmPayment(e) {
     e.preventDefault();
+    if (!this.model.currentUser && !this.model.currentAdmin) {
+      this.view.showToast("Debes iniciar sesión para confirmar la compra.", "error");
+      this.handleOpenAuthModal('login');
+      return;
+    }
     const cliente = document.getElementById('checkoutBuyerName').value.trim();
     const email = document.getElementById('checkoutBuyerEmail').value.trim();
     const telefono = document.getElementById('checkoutBuyerPhone').value.trim();
@@ -406,12 +670,12 @@ class TicketController {
     if (tab === 'login') {
       if (formLogin) formLogin.classList.remove('hidden');
       if (formReg) formReg.classList.add('hidden');
-      if (tabLogin) tabLogin.className = "flex-1 py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400";
+      if (tabLogin) tabLogin.className = "flex-1 py-2 text-xs font-bold text-amber-600 dark:text-amber-400 border-b-2 border-amber-600 dark:border-amber-400";
       if (tabReg) tabReg.className = "flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-600";
     } else {
       if (formLogin) formLogin.classList.add('hidden');
       if (formReg) formReg.classList.remove('hidden');
-      if (tabReg) tabReg.className = "flex-1 py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400";
+      if (tabReg) tabReg.className = "flex-1 py-2 text-xs font-bold text-amber-600 dark:text-amber-400 border-b-2 border-amber-600 dark:border-amber-400";
       if (tabLogin) tabLogin.className = "flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-600";
     }
   }
@@ -619,6 +883,8 @@ class TicketController {
   }
 
   handleLogout() {
+    this.pendingSeatSelection = null;
+    this.pendingTableSelection = null;
     this.model.logout();
     this.handleNavigate('client');
     this.view.showToast("Has cerrado sesión exitosamente.", "info");
@@ -654,12 +920,12 @@ class TicketController {
     const door = doorSelect ? doorSelect.value : "Puerta 1 - Acceso VIP & Diamond";
 
     let allowedZones = ['ALL'];
-    if (door.includes('VIP') || door.includes('Diamond') || door.includes('1')) {
-      allowedZones = ['DIAMOND'];
-    } else if (door.includes('Gold') || door.includes('Preferencial') || door.includes('2')) {
-      allowedZones = ['GOLD'];
-    } else if (door.includes('Silver') || door.includes('General') || door.includes('3')) {
-      allowedZones = ['SILVER'];
+    if (door.includes('VIP') || door.includes('Sahara') || door.includes('1')) {
+      allowedZones = ['SAHARA'];
+    } else if (door.includes('Oasis') || door.includes('Preferencial') || door.includes('2')) {
+      allowedZones = ['OASIS'];
+    } else if (door.includes('Nomad') || door.includes('General') || door.includes('3')) {
+      allowedZones = ['NOMAD'];
     } else {
       allowedZones = ['ALL'];
     }
@@ -686,32 +952,184 @@ class TicketController {
     }
   }
 
-  // --- STAFF: ESCÁNER QR ---
+  // --- STAFF & ADMIN: MÓDULO ESCÁNER QR ---
   initScanner() {
     const readerContainer = document.getElementById('reader');
     if (!readerContainer) return;
 
-    if (this.html5QrCode) {
-      try { this.html5QrCode.stop(); } catch (e) {}
+    // Configurar badge de rol y botón de retorno
+    const btnReturn = document.getElementById('btn-scanner-return');
+    const badgeRole = document.getElementById('scanner-role-badge');
+    
+    if (this.model.currentAdmin) {
+      if (badgeRole) {
+        badgeRole.textContent = "Super Administrador";
+        badgeRole.className = "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 border border-amber-300";
+      }
+      if (btnReturn) {
+        btnReturn.innerHTML = `<i class="fa-solid fa-chart-line"></i> <span>Volver al Panel Administrador</span>`;
+        btnReturn.onclick = () => this.handleNavigate('admin');
+      }
+    } else if (this.model.currentStaff) {
+      if (badgeRole) {
+        badgeRole.textContent = `Staff: ${this.model.currentStaff.door || 'Validador'}`;
+        badgeRole.className = "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300";
+      }
+      if (btnReturn) {
+        btnReturn.innerHTML = `<i class="fa-solid fa-map-location-dot"></i> <span>Volver al Plano</span>`;
+        btnReturn.onclick = () => this.handleNavigate('client');
+      }
     }
 
-    if (typeof Html5QrcodeScanner !== 'undefined') {
-      const scanner = new Html5QrcodeScanner("reader", {
-        fps: 10,
-        qrbox: 240,
-        aspectRatio: 1.0
-      });
+    // Inicializar instancia de Html5Qrcode si no existe
+    if (!this.html5QrEngine && typeof Html5Qrcode !== 'undefined') {
+      try {
+        this.html5QrEngine = new Html5Qrcode("reader");
+      } catch (e) {
+        console.warn('Error inicializando Html5Qrcode engine:', e);
+      }
+    }
+  }
 
-      scanner.render((decodedText) => {
-        try {
-          const parsed = JSON.parse(decodedText);
-          this.handleValidateCode(parsed.codigo || parsed.pedido || decodedText);
-        } catch (e) {
-          this.handleValidateCode(decodedText);
+  handleSwitchScannerTab(tab) {
+    const tabs = ['camera', 'file', 'manual'];
+    tabs.forEach(t => {
+      const panel = document.getElementById(`panel-scanner-${t}`);
+      const btn = document.getElementById(`tab-scan-${t}-btn`);
+      if (panel) {
+        if (t === tab) panel.classList.remove('hidden');
+        else panel.classList.add('hidden');
+      }
+      if (btn) {
+        if (t === tab) {
+          btn.className = "flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black shadow-sm transition-all";
+        } else {
+          btn.className = "flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all";
         }
-      });
-      this.html5QrCode = scanner;
+      }
+    });
+
+    if (tab !== 'camera') {
+      this.handleStopCameraScan();
     }
+  }
+
+  async handleStartCameraScan() {
+    const placeholder = document.getElementById('camera-idle-placeholder');
+    const errorBanner = document.getElementById('camera-error-banner');
+    const errorMsg = document.getElementById('camera-error-msg');
+    const activeControls = document.getElementById('camera-active-controls');
+
+    if (errorBanner) errorBanner.classList.add('hidden');
+
+    if (!this.html5QrEngine && typeof Html5Qrcode !== 'undefined') {
+      try {
+        this.html5QrEngine = new Html5Qrcode("reader");
+      } catch (e) {
+        console.warn('Error instanciando Html5Qrcode:', e);
+      }
+    }
+
+    if (!this.html5QrEngine) {
+      if (errorBanner) errorBanner.classList.remove('hidden');
+      if (errorMsg) errorMsg.textContent = "El motor del escáner no se encuentra disponible. Puedes subir la imagen o validar el código manualmente.";
+      return;
+    }
+
+    try {
+      if (placeholder) placeholder.classList.add('hidden');
+      
+      const config = {
+        fps: 12,
+        qrbox: { width: 230, height: 230 },
+        aspectRatio: 1.0
+      };
+
+      await this.html5QrEngine.start(
+        { facingMode: this.cameraFacingMode || "environment" },
+        config,
+        (decodedText) => {
+          this.handleValidateCode(decodedText);
+          this.view.showToast("⚡ Código detectado correctamente", "success");
+        },
+        (error) => {
+          // Ignorar cuadros sin código
+        }
+      );
+
+      this.isCameraScanning = true;
+      if (activeControls) activeControls.classList.remove('hidden');
+
+    } catch (err) {
+      console.warn("Error al encender cámara:", err);
+      this.isCameraScanning = false;
+      if (placeholder) placeholder.classList.add('hidden');
+      if (errorBanner) errorBanner.classList.remove('hidden');
+      if (activeControls) activeControls.classList.add('hidden');
+
+      let userMsg = "No se pudo acceder a la cámara. Asegúrate de otorgar permisos al navegador.";
+      const errStr = String(err);
+      if (errStr.includes('NotFoundError') || errStr.includes('Requested device not found')) {
+        userMsg = "No se detectó ninguna cámara web conectada a este equipo. Puedes usar 'Subir Foto QR' o 'Código Manual'.";
+      } else if (errStr.includes('NotAllowedError') || errStr.includes('Permission denied')) {
+        userMsg = "Permiso de cámara denegado. Permite el acceso a la cámara en los permisos de tu navegador o usa 'Subir Foto QR'.";
+      }
+      if (errorMsg) errorMsg.textContent = userMsg;
+      this.view.showToast(userMsg, "warning");
+    }
+  }
+
+  async handleStopCameraScan() {
+    const placeholder = document.getElementById('camera-idle-placeholder');
+    const activeControls = document.getElementById('camera-active-controls');
+
+    if (this.html5QrEngine && this.isCameraScanning) {
+      try {
+        await this.html5QrEngine.stop();
+      } catch (e) {
+        console.warn("Error al detener cámara:", e);
+      }
+      this.isCameraScanning = false;
+    }
+
+    if (activeControls) activeControls.classList.add('hidden');
+    if (placeholder) placeholder.classList.remove('hidden');
+  }
+
+  async handleToggleCameraDevice() {
+    this.cameraFacingMode = (this.cameraFacingMode === "user") ? "environment" : "user";
+    await this.handleStopCameraScan();
+    await this.handleStartCameraScan();
+  }
+
+  async handleQrFileScan(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!this.html5QrEngine && typeof Html5Qrcode !== 'undefined') {
+      try {
+        this.html5QrEngine = new Html5Qrcode("reader");
+      } catch (e) {}
+    }
+
+    this.view.showToast("🔍 Procesando imagen QR...", "info");
+
+    try {
+      const decodedText = await this.html5QrEngine.scanFile(file, true);
+      this.handleValidateCode(decodedText);
+      this.view.showToast("✅ ¡Código QR leído exitosamente desde el archivo!", "success");
+    } catch (err) {
+      console.warn("Error leyendo QR desde archivo:", err);
+      this.view.showToast("No se pudo detectar un código QR claro en esta imagen. Puedes ingresar el código alfanumérico manualmente.", "warning");
+    }
+
+    event.target.value = '';
+  }
+
+  handleQuickTestCode(code) {
+    const input = document.getElementById('input-manual-code');
+    if (input) input.value = code;
+    this.handleValidateCode(code);
   }
 
   handleValidateManualCode() {

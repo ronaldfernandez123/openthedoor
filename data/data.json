@@ -1,62 +1,6 @@
 {
-  "seatsState": {
-    "A1-S9": {
-      "status": "sold"
-    },
-    "A1-S3": {
-      "status": "sold"
-    },
-    "A1-S2": {
-      "status": "sold",
-      "buyer": "ronaldfernans15"
-    }
-  },
-  "salesHistory": [
-    {
-      "idPedido": "ORD-002662",
-      "codigoCompra": "OPN-997419",
-      "cliente": "Ronald Fernandez",
-      "email": "ronaldfernans15@gmail.com",
-      "telefono": "3135306614",
-      "numEntradas": 2,
-      "puestos": [
-        "A1-S9",
-        "A1-S3"
-      ],
-      "total": 200000,
-      "metodoPago": "Transferencia Bancolombia",
-      "comprobanteRef": "BANCOL-201782",
-      "fechaHora": "8/10/2026, 12:56:42 p. m.",
-      "usado": false,
-      "escaneadoPor": null,
-      "fechaEscaneo": null,
-      "estadoPago": "APROBADO"
-    },
-    {
-      "idPedido": "ORD-052357",
-      "codigoCompra": "OPN-593831",
-      "cliente": "ronaldfernans15",
-      "email": "ronaldfernans15@gmail.com",
-      "telefono": "3176774920",
-      "numEntradas": 1,
-      "puestos": [
-        "A1-S2"
-      ],
-      "zonas": [
-        "DIAMOND"
-      ],
-      "zonaNombre": "Zona Diamond VIP",
-      "puertaSugerida": "Puerta 1 - Acceso VIP & Diamond",
-      "total": 100000,
-      "metodoPago": "Transferencia Bancolombia",
-      "comprobanteRef": "BANCOLOMBIA  123456",
-      "fechaHora": "8/10/2026, 1:30:52 p. m.",
-      "usado": false,
-      "escaneadoPor": null,
-      "fechaEscaneo": null,
-      "estadoPago": "APROBADO"
-    }
-  ],
+  "seatsState": {},
+  "salesHistory": [],
   "staffUsers": [
     {
       "id": "STF-001",
@@ -65,7 +9,8 @@
       "username": "puerta1",
       "password": "puerta123password",
       "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
-      "door": "Puerta Principal - Diamond & Gold",
+      "door": "Puerta 1 - Acceso VIP Sahara",
+      "allowedZones": ["SAHARA"],
       "fechaCreacion": "08/10/2026"
     },
     {
@@ -75,57 +20,72 @@
       "username": "puerta2",
       "password": "puerta123password",
       "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
-      "door": "Puerta Lateral - Silver",
+      "door": "Puerta 2 - Acceso Preferencial Oasis",
+      "allowedZones": ["OASIS"],
+      "fechaCreacion": "08/10/2026"
+    },
+    {
+      "id": "STF-003",
+      "nombre": "Julián",
+      "apellido": "Pérez",
+      "username": "puerta3",
+      "password": "puerta123password",
+      "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80",
+      "door": "Puerta 3 - Acceso General Nomad",
+      "allowedZones": ["NOMAD"],
       "fechaCreacion": "08/10/2026"
     }
   ],
   "adminSessions": {},
   "eventInfo": {
-    "id": "EVT-OPENDOOR-01",
-    "title": "Gran Gala & Concierto Exclusivo - Reserva de Mesas",
-    "date": "2026-11-28T20:00",
-    "venue": "Gran Salón Real & Arena 360°",
-    "address": "Centro de Convenciones & Eventos Metropolitan, Bogotá",
+    "id": "EVT-CARTAGENAPLAZA-2026",
+    "title": "Cena San Silvestre 2026 - Hotel Cartagena Plaza",
+    "date": "2026-12-31T20:00",
+    "venue": "Playa del Hotel Cartagena Plaza",
+    "address": "Cartagena de Indias D.T. y C. - RNT 5286",
     "image": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80",
-    "category": "Concierto & Gala",
+    "category": "Cena San Silvestre & Fiesta de Fin de Año",
     "totalCapacity": 600,
-    "minAge": "+18 años",
-    "doorsOpen": "18:30 hs",
-    "parking": "Parqueadero privado con servicio de valet parking",
-    "announcement": "Apertura de puertas a las 18:30 hs. Presentar comprobante digital con código QR para validación por cámara en puerta asignada.",
+    "minAge": "Todas las edades (Adulto a partir de 12 años, Niño de 4 a 11 años, Menores de 4 gratis)",
+    "doorsOpen": "19:00 hs",
+    "parking": "Parqueadero privado del Hotel Cartagena Plaza",
+    "announcement": "Celebración de fin de año en la Playa del Hotel Cartagena Plaza. Presentar comprobante digital con código QR para validación por cámara en puerta asignada.",
     "zones": {
-      "DIAMOND": {
-        "name": "Zona Diamond",
-        "price": 100000,
+      "SAHARA": {
+        "name": "Zona Sahara",
+        "price": 1050000,
+        "childPrice": 420000,
         "start": "A",
         "end": "B",
         "tablesPerLetter": 5,
         "seatsPerTable": 10,
         "totalSeats": 100,
-        "color": "indigo",
-        "door": "Puerta 1 - Acceso VIP & Diamond"
+        "color": "amber",
+        "door": "Puerta 1 - Acceso VIP Sahara"
       },
-      "GOLD": {
-        "name": "Zona Gold",
-        "price": 70000,
+      "OASIS": {
+        "name": "Zona Oasis",
+        "price": 950000,
+        "childPrice": 420000,
         "start": "C",
         "end": "H",
         "tablesPerLetter": 5,
         "seatsPerTable": 10,
         "totalSeats": 300,
-        "color": "amber",
-        "door": "Puerta 2 - Acceso Preferencial Gold"
+        "color": "rose",
+        "door": "Puerta 2 - Acceso Preferencial Oasis"
       },
-      "SILVER": {
-        "name": "Zona Silver",
-        "price": 40000,
+      "NOMAD": {
+        "name": "Zona Nomad",
+        "price": 850000,
+        "childPrice": 420000,
         "start": "I",
         "end": "L",
         "tablesPerLetter": 5,
         "seatsPerTable": 10,
         "totalSeats": 200,
-        "color": "slate",
-        "door": "Puerta 3 - Acceso General Silver"
+        "color": "yellow",
+        "door": "Puerta 3 - Acceso General Nomad"
       }
     }
   }

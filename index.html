@@ -3,27 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cena de San Silvestre 2026 | Hotel Cartagena Plaza</title>
+  <title>Cena San Silvestre 2026 | Hotel Cartagena Plaza</title>
   
   <!-- SEO & Meta Tags -->
-  <meta name="description" content="Despide el año en Cartagena de Indias con la Cena de San Silvestre 2026 del Hotel Cartagena Plaza. Consulta las zonas Sahara, Oasis y Nomad, los precios y los canales de boletería.">
-  <meta name="keywords" content="San Silvestre, Año Nuevo, Cartagena de Indias, Hotel Cartagena Plaza, cena, boletería, eventos">
-  <meta name="author" content="Hotel Cartagena Plaza">
+  <meta name="description" content="Despide el año 2026 con la exclusiva Cena de San Silvestre en la Playa del Hotel Cartagena Plaza (EM HOTELS). Reserva interactiva de mesas circulares en tiempo real para las zonas Sahara, Oasis y Nomad.">
+  <meta name="keywords" content="Cena San Silvestre 2026, Hotel Cartagena Plaza, EM HOTELS, Cartagena de Indias, Año Nuevo, Zonas Sahara Oasis Nomad, Boletería Digital, Reserva de Mesas">
+  <meta name="author" content="Hotel Cartagena Plaza - EM HOTELS">
   <meta name="theme-color" content="#D4AF37">
   
-  <!-- Open Graph -->
-  <meta property="og:title" content="Cena de San Silvestre 2026 | Hotel Cartagena Plaza">
-  <meta property="og:description" content="Despide el año en Cartagena de Indias con una celebración exclusiva frente al mar.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://openthedoor-iota.vercel.app/">
-  
-  <!-- Favicon -->
+  <!-- Favicon SVG -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D4AF37'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z'/></svg>">
-  
-  <!-- Google Fonts -->
+
+  <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -33,36 +27,18 @@
       theme: {
         extend: {
           colors: {
-            'champagne': '#D4AF37',
-            'champagne-light': '#F3D98B',
-            'elegant-black': '#171717',
-            'wine-red': '#842515',
-            'warm-white': '#FFFDF7',
-            'beige': '#EDE2C9',
-            'forest-green': '#174C36'
+            'gold': '#D4AF37',
+            'gold-light': '#F3D98B',
+            'gold-dark': '#B8972E',
+            'wine': '#842515',
+            'wine-dark': '#5D190D',
+            'nomad-brown': '#8B7355',
+            'lounge-teal': '#1E6B7B'
           },
           fontFamily: {
             'sans': ['"Plus Jakarta Sans"', 'sans-serif'],
+            'serif': ['"Playfair Display"', 'serif'],
             'playfair': ['"Playfair Display"', 'serif']
-          },
-          animation: {
-            'float': 'float 6s ease-in-out infinite',
-            'pulse-light': 'pulse-light 2s ease-in-out infinite',
-            'shimmer': 'shimmer 2s infinite'
-          },
-          keyframes: {
-            'float': {
-              '0%, 100%': { transform: 'translateY(0px)' },
-              '50%': { transform: 'translateY(-10px)' }
-            },
-            'pulse-light': {
-              '0%, 100%': { opacity: '0.4' },
-              '50%': { opacity: '1' }
-            },
-            'shimmer': {
-              '0%': { backgroundPosition: '1000% 0' },
-              '100%': { backgroundPosition: '-1000% 0' }
-            }
           }
         }
       }
@@ -72,833 +48,1428 @@
   <!-- FontAwesome v6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Custom Styles -->
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <!-- Socket.IO Client via CDN -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
-    html {
-      scroll-behavior: smooth;
-    }
+  <!-- QRCode.js (Generador de Códigos QR Oficiales) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    body {
-      background-color: #FFFDF7;
-      color: #171717;
-    }
+  <!-- HTML5-QRCode (Lector y Escáner de Cámara QR) -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
-    /* Hero Background */
-    .hero-bg {
-      background: linear-gradient(135deg, #EDE2C9 0%, #FFFDF7 50%, #F3D98B 100%);
-      position: relative;
-      overflow: hidden;
-    }
+  <!-- html2pdf.js (Generador de Comprobante PDF Oficial) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    .hero-bg::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -10%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
-    }
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    .hero-bg::after {
-      content: '';
-      position: absolute;
-      bottom: -50%;
-      left: -10%;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(132, 37, 21, 0.08) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    /* Golden decorative elements */
-    .gold-accent {
-      color: #D4AF37;
-    }
-
-    .gold-border {
-      border-color: #D4AF37;
-    }
-
-    .gold-bg {
-      background-color: #D4AF37;
-    }
-
-    /* Countdown Timer */
-    .countdown {
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-
-    /* Zone badges */
-    .zone-sahara { background: linear-gradient(135deg, #D4AF37, #F3D98B); color: #171717; }
-    .zone-oasis { background: linear-gradient(135deg, #842515, #a84d2a); color: white; }
-    .zone-nomad { background: linear-gradient(135deg, #8B7355, #C9A96E); color: white; }
-
-    /* Price table */
-    .price-table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    .price-table th,
-    .price-table td {
-      padding: 12px 16px;
-      text-align: center;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-    }
-
-    .price-table th {
-      background: linear-gradient(135deg, #D4AF37, #F3D98B);
-      color: #171717;
-      font-weight: bold;
-      text-transform: uppercase;
-      font-size: 12px;
-    }
-
-    .price-table tr:nth-child(even) {
-      background-color: rgba(237, 226, 201, 0.3);
-    }
-
-    /* Section spacing */
-    .section-spacing {
-      padding: 60px 20px;
-    }
-
-    /* Icon grid */
-    .icon-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 30px;
-      text-align: center;
-    }
-
-    .icon-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .icon-item i {
-      font-size: 36px;
-      color: #D4AF37;
-    }
-
-    /* Smooth scroll */
-    @media (prefers-reduced-motion: no-preference) {
-      .fade-in {
-        animation: fadeIn 0.8s ease-in-out;
-      }
-
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .section-spacing { padding: 40px 16px; }
-      .icon-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-    }
-
-    /* Hover effects */
-    .btn-hover-gold {
-      transition: all 0.3s ease;
-    }
-
-    .btn-hover-gold:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(212, 175, 55, 0.3);
-    }
-
-    /* WhatsApp button */
-    .btn-whatsapp {
-      background-color: #25D366;
-      color: white;
-      transition: all 0.3s ease;
-    }
-
-    .btn-whatsapp:hover {
-      background-color: #20BA58;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(37, 211, 102, 0.3);
-    }
-
-    /* Gold stars decoration */
-    .star-decoration {
-      position: relative;
-      display: inline-block;
-    }
-
-    .star-decoration::before,
-    .star-decoration::after {
-      content: '★';
-      color: #D4AF37;
-      font-size: 0.8em;
-      margin: 0 8px;
-    }
-  </style>
+  <!-- Estilos Personalizados & Mesas Circulares -->
+  <link rel="stylesheet" href="css/styles.css?v=3.6">
 </head>
-<body class="h-full text-elegant-black bg-warm-white">
+<body class="h-full text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 transition-colors">
 
-  <!-- ==================== HEADER / NAVIGATION ==================== -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-champagne/20 shadow-sm transition-all">
+  <!-- ==================== HEADER / NAVEGACIÓN ==================== -->
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-amber-200/60 dark:border-slate-800 shadow-sm transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-champagne flex items-center justify-center text-elegant-black font-bold">
-            <i class="fa-solid fa-door-open"></i>
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
+        
+        <!-- Brand / Logo: Hotel Cartagena Plaza & EM Hotels -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="appController.handleNavigate('client')">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center text-slate-950 font-black shadow-md shadow-amber-500/20">
+            <i class="fa-solid fa-hotel text-lg sm:text-xl"></i>
           </div>
           <div>
-            <span class="text-xl font-black tracking-tight text-elegant-black">Hotel Cartagena</span>
-            <span class="hidden sm:inline-block ml-1 text-[10px] font-bold uppercase tracking-wider text-wine-red">San Silvestre 2026</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs uppercase font-extrabold tracking-widest text-wine dark:text-amber-400">EM HOTELS ★★★★</span>
+            </div>
+            <h1 class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white leading-tight font-serif">
+              Hotel Cartagena Plaza
+            </h1>
+            <p class="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <i class="fa-solid fa-sparkles"></i> Cena San Silvestre 2026 • 31 DIC
+            </p>
           </div>
         </div>
 
-        <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
-          <a href="#hero" class="hover:text-champagne transition-colors">Inicio</a>
-          <a href="#countdown" class="hover:text-champagne transition-colors">Cuenta Regresiva</a>
-          <a href="#zones" class="hover:text-champagne transition-colors">Zonas</a>
-          <a href="#prices" class="hover:text-champagne transition-colors">Precios</a>
-          <a href="#experience" class="hover:text-champagne transition-colors">Experiencia</a>
-          <a href="#contact" class="hover:text-champagne transition-colors">Contacto</a>
+        <!-- Enlaces Rápidos de Navegación -->
+        <nav class="hidden lg:flex items-center gap-5 text-xs font-bold text-slate-600 dark:text-slate-300">
+          <a href="#hero" onclick="appController.handleNavToSection('hero', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Inicio</a>
+          <a href="#mapa-reserva" onclick="appController.handleNavToSection('mapa-reserva', event)" class="text-amber-600 dark:text-amber-400 font-extrabold flex items-center gap-1">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Plano en Vivo
+          </a>
+          <a href="#zones" onclick="appController.handleNavToSection('zones', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Zonas</a>
+          <a href="#prices" onclick="appController.handleNavToSection('prices', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Precios</a>
+          <a href="#experience" onclick="appController.handleNavToSection('experience', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">¿Qué Incluye?</a>
+          <a href="#contact" onclick="appController.handleNavToSection('contact', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Contacto</a>
         </nav>
 
-        <button onclick="openWhatsapp('general')" class="px-4 py-2 bg-champagne hover:bg-champagne-light text-elegant-black rounded-lg font-bold transition-all hidden sm:flex items-center gap-2 btn-hover-gold">
-          <i class="fa-brands fa-whatsapp"></i> Consultar
-        </button>
+        <!-- Acciones del Usuario & Autenticación -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- Botón Modo Oscuro / Claro -->
+          <button id="btnToggleTheme" onclick="appController.handleToggleTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm transition-all border border-slate-200 dark:border-slate-700" title="Cambiar Tema">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+
+          <!-- Grupo No Autenticado -->
+          <div id="auth-buttons-group" class="flex items-center gap-1.5 sm:gap-2">
+            <button onclick="appController.handleGooglePromptOrDemo()" class="px-2.5 sm:px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5" title="Acceso con Google">
+              <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span class="hidden sm:inline">Google</span>
+            </button>
+            <button onclick="appController.handleOpenAuthModal('login')" class="px-2.5 sm:px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-amber-600 transition-colors">
+              Ingresar
+            </button>
+            <button onclick="appController.handleOpenPortalModal('admin')" class="px-2.5 sm:px-3 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700">
+              <i class="fa-solid fa-shield-halved text-amber-400"></i> <span class="hidden sm:inline">Portal</span> Admin
+            </button>
+          </div>
+
+          <!-- Grupo Autenticado -->
+          <div id="user-info" class="hidden flex items-center gap-2">
+            <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <img id="user-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="w-7 h-7 rounded-full object-cover border border-amber-400">
+              <span id="user-name" class="text-xs font-bold text-slate-800 dark:text-slate-200"></span>
+            </div>
+
+            <button id="btn-mis-boletas" onclick="appController.handleNavigate('my-tickets')" class="px-3 py-2 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 rounded-xl text-xs font-bold border border-amber-200 dark:border-amber-800 transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-ticket"></i> Mis Boletas
+            </button>
+
+            <button id="btn-panel-admin" onclick="appController.handleNavigate('admin')" class="hidden px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-line"></i> Admin
+            </button>
+
+            <button id="btn-scanner-admin" onclick="appController.handleNavigate('staff')" class="hidden px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5" title="Escanear entradas como Administrador">
+              <i class="fa-solid fa-camera"></i> Escáner
+            </button>
+
+            <button id="btn-panel-staff" onclick="appController.handleNavigate('staff')" class="hidden px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-qrcode"></i> Validador
+            </button>
+
+            <button onclick="appController.handleLogout()" class="px-3 py-2 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 text-rose-600 dark:text-rose-300 rounded-xl text-xs font-bold transition-all" title="Cerrar Sesión">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
+
+        </div>
+
       </div>
+
+      <!-- Barra de Navegación Rápida Móvil / Tablet -->
+      <div class="flex lg:hidden items-center gap-4 py-2.5 border-t border-slate-100 dark:border-slate-800 overflow-x-auto no-scrollbar text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">
+        <a href="#hero" onclick="appController.handleNavToSection('hero', event)" class="hover:text-amber-600 dark:hover:text-amber-400">Inicio</a>
+        <a href="#mapa-reserva" onclick="appController.handleNavToSection('mapa-reserva', event)" class="text-amber-600 dark:text-amber-400 font-extrabold flex items-center gap-1">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Plano en Vivo
+        </a>
+        <a href="#zones" onclick="appController.handleNavToSection('zones', event)" class="hover:text-amber-600 dark:hover:text-amber-400">Zonas</a>
+        <a href="#prices" onclick="appController.handleNavToSection('prices', event)" class="hover:text-amber-600 dark:hover:text-amber-400">Precios</a>
+        <a href="#experience" onclick="appController.handleNavToSection('experience', event)" class="hover:text-amber-600 dark:hover:text-amber-400">¿Qué Incluye?</a>
+        <a href="#contact" onclick="appController.handleNavToSection('contact', event)" class="hover:text-amber-600 dark:hover:text-amber-400">Contacto</a>
+      </div>
+
     </div>
   </header>
 
-  <!-- ==================== HERO SECTION ==================== -->
-  <section id="hero" class="hero-bg relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative z-10">
-      <div class="text-center space-y-8">
-        <!-- Logo Hotel -->
-        <div class="flex justify-center items-center gap-4 flex-wrap">
-          <div class="text-center">
-            <p class="text-xs sm:text-sm font-bold text-wine-red uppercase tracking-widest mb-2">✦ Celebración Exclusiva ✦</p>
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black font-playfair text-elegant-black mb-2 leading-tight">
-              Cena San Silvestre 2026
-            </h1>
-            <p class="text-2xl font-bold text-champagne">Hotel Cartagena Plaza</p>
-          </div>
-        </div>
-
-        <!-- Promotional Text -->
-        <p class="max-w-2xl mx-auto text-base sm:text-lg text-elegant-black/80 leading-relaxed">
-          Despide el 2026 y recibe el nuevo año con una noche inolvidable frente al ambiente exclusivo del Hotel Cartagena Plaza. Disfruta una celebración llena de música, gastronomía, alegría y momentos especiales en la hermosa Playa de Cartagena.
-        </p>
-
-        <!-- Main CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-          <button onclick="openWhatsapp('general')" class="px-8 py-4 bg-champagne hover:bg-champagne-light text-elegant-black font-bold rounded-xl transition-all flex items-center justify-center gap-2 btn-hover-gold text-base">
-            <i class="fa-brands fa-whatsapp"></i> Consultar Boletería
-          </button>
-          <button onclick="document.getElementById('prices').scrollIntoView({ behavior: 'smooth' })" class="px-8 py-4 bg-wine-red hover:bg-opacity-90 text-warm-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-base">
-            <i class="fa-solid fa-tag"></i> Ver Planes y Precios
-          </button>
-        </div>
-
-        <!-- Date Highlight -->
-        <div class="pt-4">
-          <div class="inline-flex items-center gap-3 px-6 py-3 bg-white/70 backdrop-blur-md rounded-full border-2 border-champagne/40">
-            <i class="fa-solid fa-calendar-days text-champagne text-lg"></i>
-            <span class="font-bold text-elegant-black">Jueves, 31 de Diciembre de 2026</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== COUNTDOWN TIMER ==================== -->
-  <section id="countdown" class="section-spacing bg-gradient-to-r from-elegant-black via-wine-red to-elegant-black text-warm-white">
-    <div class="max-w-4xl mx-auto text-center space-y-8">
-      <h2 class="text-3xl lg:text-4xl font-black font-playfair">
-        <span class="star-decoration">Cuenta Regresiva</span>
-      </h2>
+  <!-- ==================== VISTA 1: CLIENTE / LANDING + PLANO INTERACTIVO ==================== -->
+  <main id="view-client" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
+    
+    <!-- HERO SECTION (Cena San Silvestre 2026 - Hotel Cartagena Plaza) -->
+    <section id="hero" class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950 text-white p-6 sm:p-10 lg:p-14 shadow-2xl border border-amber-500/30">
       
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-champagne/30 space-y-2">
-          <div class="countdown text-3xl lg:text-4xl font-bold text-champagne" id="days">0</div>
-          <p class="text-xs uppercase tracking-widest font-semibold text-champagne-light">Días</p>
-        </div>
-        <div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-champagne/30 space-y-2">
-          <div class="countdown text-3xl lg:text-4xl font-bold text-champagne" id="hours">0</div>
-          <p class="text-xs uppercase tracking-widest font-semibold text-champagne-light">Horas</p>
-        </div>
-        <div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-champagne/30 space-y-2">
-          <div class="countdown text-3xl lg:text-4xl font-bold text-champagne" id="minutes">0</div>
-          <p class="text-xs uppercase tracking-widest font-semibold text-champagne-light">Minutos</p>
-        </div>
-        <div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-champagne/30 space-y-2">
-          <div class="countdown text-3xl lg:text-4xl font-bold text-champagne" id="seconds">0</div>
-          <p class="text-xs uppercase tracking-widest font-semibold text-champagne-light">Segundos</p>
-        </div>
-      </div>
+      <!-- Decoración de Fondo -->
+      <div class="absolute -right-20 -top-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <p class="text-sm text-champagne-light font-semibold" id="countdown-message">
-        ¡La celebración está próxima!
-      </p>
-    </div>
-  </section>
-
-  <!-- ==================== LOCATION SECTION ==================== -->
-  <section id="location" class="section-spacing bg-beige">
-    <div class="max-w-4xl mx-auto space-y-8">
-      <h2 class="text-3xl lg:text-4xl font-black font-playfair text-center">
-        <span class="star-decoration">Una Noche Especial en Cartagena</span>
-      </h2>
-
-      <div class="grid md:grid-cols-2 gap-8">
-        <div class="space-y-6">
-          <div class="bg-white rounded-xl p-6 border-2 border-champagne space-y-3">
-            <div class="flex items-start gap-3">
-              <i class="fa-solid fa-location-dot text-champagne text-2xl mt-1"></i>
-              <div>
-                <p class="text-xs uppercase tracking-widest font-bold text-wine-red">Ubicación</p>
-                <p class="text-lg font-bold">Playa del Hotel Cartagena Plaza</p>
-                <p class="text-sm text-gray-600">Cartagena de Indias, Colombia</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-xl p-6 border-2 border-champagne space-y-3">
-            <div class="flex items-start gap-3">
-              <i class="fa-solid fa-calendar text-champagne text-2xl mt-1"></i>
-              <div>
-                <p class="text-xs uppercase tracking-widest font-bold text-wine-red">Fecha</p>
-                <p class="text-lg font-bold">Jueves, 31 de Diciembre 2026</p>
-                <p class="text-sm text-gray-600">Una noche de celebración</p>
-              </div>
-            </div>
-          </div>
-
-          <button onclick="openMaps()" class="w-full px-6 py-3 bg-champagne hover:bg-champagne-light text-elegant-black font-bold rounded-xl transition-all btn-hover-gold flex items-center justify-center gap-2">
-            <i class="fa-solid fa-map"></i> Ver en Google Maps
-          </button>
+      <div class="relative z-10 space-y-6 max-w-3xl">
+        
+        <!-- Insignia Oficial EM Hotels -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-amber-500 text-slate-950 shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-crown text-xs"></i> EM HOTELS ★★★★
+          </span>
+          <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-white/10 text-amber-300 border border-amber-400/30">
+            Cartagena de Indias D.T. y C. - RNT 5286
+          </span>
         </div>
 
-        <div class="h-80 bg-elegant-black rounded-xl overflow-hidden border-2 border-champagne shadow-xl">
-          <div class="w-full h-full flex items-center justify-center">
-            <div class="text-center text-warm-white space-y-3">
-              <i class="fa-solid fa-map text-champagne text-5xl"></i>
-              <p class="text-sm font-semibold">Playa del Hotel Cartagena Plaza</p>
-              <p class="text-xs text-champagne-light">Cartagena, Colombia</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== ZONE SELECTION ==================== -->
-  <section id="zones" class="section-spacing bg-warm-white">
-    <div class="max-w-6xl mx-auto space-y-12">
-      <h2 class="text-3xl lg:text-4xl font-black font-playfair text-center">
-        <span class="star-decoration">Elige Tu Experiencia</span>
-      </h2>
-
-      <!-- Zone Cards -->
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- Zona Sahara -->
-        <div class="rounded-2xl overflow-hidden shadow-xl border-2 border-champagne hover:shadow-2xl transition-all transform hover:-translate-y-2">
-          <div class="zone-sahara p-6 text-center space-y-2">
-            <i class="fa-solid fa-sun text-3xl"></i>
-            <h3 class="text-2xl font-black font-playfair">Zona Sahara</h3>
-            <p class="text-sm font-semibold">Primera Línea</p>
-          </div>
-          <div class="bg-white p-6 space-y-4">
-            <p class="text-sm text-gray-600 text-center">Experiencia premium junto al escenario principal con las mejores vistas y acceso exclusivo.</p>
-            <div class="text-center py-3 bg-champagne/10 rounded-lg">
-              <p class="text-xs uppercase tracking-widest font-bold text-champagne mb-1">Ubicación</p>
-              <p class="font-bold">Primera Línea de Playa</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Zona Oasis -->
-        <div class="rounded-2xl overflow-hidden shadow-xl border-2 border-wine-red hover:shadow-2xl transition-all transform hover:-translate-y-2">
-          <div class="zone-oasis p-6 text-center space-y-2">
-            <i class="fa-solid fa-water text-3xl"></i>
-            <h3 class="text-2xl font-black font-playfair">Zona Oasis</h3>
-            <p class="text-sm font-semibold">Área Preferencial</p>
-          </div>
-          <div class="bg-white p-6 space-y-4">
-            <p class="text-sm text-gray-600 text-center">Confort y elegancia en una zona privilegiada con excelente ambiente y servicio personalizado.</p>
-            <div class="text-center py-3 bg-wine-red/10 rounded-lg">
-              <p class="text-xs uppercase tracking-widest font-bold text-wine-red mb-1">Ubicación</p>
-              <p class="font-bold">Zona Central</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Zona Nomad -->
-        <div class="rounded-2xl overflow-hidden shadow-xl border-2 border-amber-800 hover:shadow-2xl transition-all transform hover:-translate-y-2">
-          <div class="zone-nomad p-6 text-center space-y-2">
-            <i class="fa-solid fa-campground text-3xl"></i>
-            <h3 class="text-2xl font-black font-playfair">Zona Nomad</h3>
-            <p class="text-sm font-semibold">Acceso General</p>
-          </div>
-          <div class="bg-white p-6 space-y-4">
-            <p class="text-sm text-gray-600 text-center">Ambiente festivo y accesible con todas las comodidades para disfrutar la celebración.</p>
-            <div class="text-center py-3 bg-amber-800/10 rounded-lg">
-              <p class="text-xs uppercase tracking-widest font-bold text-amber-800 mb-1">Ubicación</p>
-              <p class="font-bold">Zona General</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== PRICING SECTION ==================== -->
-  <section id="prices" class="section-spacing bg-elegant-black text-warm-white">
-    <div class="max-w-6xl mx-auto space-y-12">
-      <h2 class="text-3xl lg:text-4xl font-black font-playfair text-center">
-        <span class="star-decoration">Planes y Precios Oficiales</span>
-      </h2>
-
-      <p class="text-center text-champagne-light font-semibold max-w-2xl mx-auto">
-        Todos los precios están en pesos colombianos (COP) e incluyen cena buffet, bebidas, entretenimiento en vivo y más.
-      </p>
-
-      <!-- Zona Sahara -->
-      <div class="space-y-4">
-        <h3 class="text-2xl font-black font-playfair text-champagne flex items-center gap-2">
-          <i class="fa-solid fa-sun"></i> Zona Sahara
-        </h3>
-        <div class="overflow-x-auto rounded-xl border border-champagne/30">
-          <table class="price-table">
-            <thead>
-              <tr>
-                <th>Tipo de Entrada</th>
-                <th>Preventa<br><span class="text-xs font-normal">Hasta 15 Oct</span></th>
-                <th>Etapa 2<br><span class="text-xs font-normal">16-30 Nov</span></th>
-                <th>Precio Full<br><span class="text-xs font-normal">Desde 1 Dic</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="background-color: rgba(212, 175, 55, 0.15);">
-                <td class="font-bold text-left">Adulto</td>
-                <td class="font-bold">$1.050.000</td>
-                <td class="font-bold">$1.100.000</td>
-                <td class="font-bold">$1.200.000</td>
-              </tr>
-              <tr>
-                <td class="font-bold text-left">Niño (4-11 años)</td>
-                <td class="font-bold">$420.000</td>
-                <td class="font-bold">$490.000</td>
-                <td class="font-bold">$550.000</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Zona Oasis -->
-      <div class="space-y-4">
-        <h3 class="text-2xl font-black font-playfair text-wine-red flex items-center gap-2">
-          <i class="fa-solid fa-water"></i> Zona Oasis
-        </h3>
-        <div class="overflow-x-auto rounded-xl border border-wine-red/30">
-          <table class="price-table">
-            <thead>
-              <tr style="background: linear-gradient(135deg, #842515, #a84d2a); color: white;">
-                <th>Tipo de Entrada</th>
-                <th>Preventa<br><span class="text-xs font-normal">Hasta 15 Oct</span></th>
-                <th>Etapa 2<br><span class="text-xs font-normal">16-30 Nov</span></th>
-                <th>Precio Full<br><span class="text-xs font-normal">Desde 1 Dic</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="background-color: rgba(132, 37, 21, 0.15);">
-                <td class="font-bold text-left">Adulto</td>
-                <td class="font-bold">$950.000</td>
-                <td class="font-bold">$1.000.000</td>
-                <td class="font-bold">$1.100.000</td>
-              </tr>
-              <tr>
-                <td class="font-bold text-left">Niño (4-11 años)</td>
-                <td class="font-bold">$420.000</td>
-                <td class="font-bold">$490.000</td>
-                <td class="font-bold">$550.000</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Zona Nomad -->
-      <div class="space-y-4">
-        <h3 class="text-2xl font-black font-playfair text-amber-400 flex items-center gap-2">
-          <i class="fa-solid fa-campground"></i> Zona Nomad
-        </h3>
-        <div class="overflow-x-auto rounded-xl border border-amber-600/30">
-          <table class="price-table">
-            <thead>
-              <tr style="background: linear-gradient(135deg, #8B7355, #C9A96E); color: white;">
-                <th>Tipo de Entrada</th>
-                <th>Preventa<br><span class="text-xs font-normal">Hasta 15 Oct</span></th>
-                <th>Etapa 2<br><span class="text-xs font-normal">16-30 Nov</span></th>
-                <th>Precio Full<br><span class="text-xs font-normal">Desde 1 Dic</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="background-color: rgba(139, 115, 85, 0.15);">
-                <td class="font-bold text-left">Adulto</td>
-                <td class="font-bold">$850.000</td>
-                <td class="font-bold">$900.000</td>
-                <td class="font-bold">$1.000.000</td>
-              </tr>
-              <tr>
-                <td class="font-bold text-left">Niño (4-11 años)</td>
-                <td class="font-bold">$420.000</td>
-                <td class="font-bold">$490.000</td>
-                <td class="font-bold">$550.000</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="bg-warm-white/10 backdrop-blur-md rounded-xl p-6 border border-champagne/30 text-center space-y-2">
-        <p class="text-sm text-champagne-light font-semibold">✓ Todos los precios incluyen impuestos y servicios</p>
-        <p class="text-sm text-champagne-light font-semibold">✓ Edades: Adulto a partir de 12 años</p>
-        <p class="text-sm text-champagne-light font-semibold">✓ Menores de 4 años ingresan sin costo (sin asiento exclusivo)</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== EXPERIENCE INCLUSIONS ==================== -->
-  <section id="experience" class="section-spacing bg-beige">
-    <div class="max-w-6xl mx-auto space-y-12">
-      <h2 class="text-3xl lg:text-4xl font-black font-playfair text-center">
-        <span class="star-decoration">¿Qué Incluye la Experiencia?</span>
-      </h2>
-
-      <div class="icon-grid">
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-utensils text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Cena Buffet</p>
-            <p class="text-xs text-gray-600">Premium</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-wine-glass text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Cóctel de</p>
-            <p class="text-xs text-gray-600">Bienvenida</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-music text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Concierto</p>
-            <p class="text-xs text-gray-600">En Vivo</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-compact-disc text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">DJ</p>
-            <p class="text-xs text-gray-600">En Vivo</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-party-horn text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Cotillones</p>
-            <p class="text-xs text-gray-600">Festivos</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-grapes text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Uvas de la</p>
-            <p class="text-xs text-gray-600">Prosperidad</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-burst text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Fuegos</p>
-            <p class="text-xs text-gray-600">Pirotécnicos</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-mug-hot text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Caldo de</p>
-            <p class="text-xs text-gray-600">Amanecida</p>
-          </div>
-        </div>
-
-        <div class="icon-item group">
-          <div class="p-4 bg-white rounded-xl group-hover:bg-champagne/10 transition-colors border-2 border-champagne/30 group-hover:border-champagne">
-            <i class="fa-solid fa-camera text-4xl"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm">Set</p>
-            <p class="text-xs text-gray-600">Fotográfico</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center">
-        <button onclick="openWhatsapp('general')" class="px-8 py-4 bg-champagne hover:bg-champagne-light text-elegant-black font-bold rounded-xl transition-all flex items-center justify-center gap-2 btn-hover-gold mx-auto text-base">
-          <i class="fa-brands fa-whatsapp"></i> ¡Quiero Participar!
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== ENTERTAINMENT SECTION ==================== -->
-  <section id="entertainment" class="section-spacing bg-gradient-to-r from-wine-red/20 to-champagne/20">
-    <div class="max-w-6xl mx-auto space-y-8">
-      <h2 class="text-3xl lg:text-4xl font-black font-playfair text-center">
-        <span class="star-decoration">Entretenimiento en Vivo</span>
-      </h2>
-
-      <p class="text-center text-lg font-semibold text-elegant-black max-w-2xl mx-auto mb-8">
-        Una noche repleta de música, ritmo y celebración con los mejores artistas y animadores.
-      </p>
-
-      <div class="bg-elegant-black rounded-2xl p-8 sm:p-12 text-center text-warm-white border-2 border-champagne">
-        <i class="fa-solid fa-music text-champagne text-6xl mb-4"></i>
-        <h3 class="text-2xl font-black font-playfair mb-3">Artistas y DJ en Vivo</h3>
-        <p class="text-champagne-light font-semibold mb-4">
-          Disfrutarás de presentaciones musicales en vivo de artistas especiales, un DJ profesional y toda la energía para celebrar tu Año Nuevo.
-        </p>
-        <div class="text-sm text-champagne font-semibold">
-          <p>✦ Música en Vivo</p>
-          <p>✦ DJ Profesional</p>
-          <p>✦ Entretenimiento de Lujo</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== CONTACT SECTION ==================== -->
-  <section id="contact" class="section-spacing bg-elegant-black text-warm-white">
-    <div class="max-w-4xl mx-auto space-y-12">
-      <h2 class="text-3xl lg:text-4xl font-black font-playfair text-center">
-        <span class="star-decoration">Contacto y Boletería</span>
-      </h2>
-
-      <p class="text-center text-champagne-light font-semibold">
-        Ponte en contacto con nuestro equipo de ventas para consultar disponibilidad y realizar tu compra.
-      </p>
-
-      <div class="grid md:grid-cols-2 gap-6">
-        <!-- WhatsApp Buttons -->
-        <button onclick="openWhatsapp('phone1')" class="btn-whatsapp p-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all">
-          <i class="fa-brands fa-whatsapp text-2xl"></i>
-          <div class="text-left">
-            <p class="text-xs uppercase tracking-widest">WhatsApp</p>
-            <p class="text-lg font-black">+57 322 7228707</p>
-          </div>
-        </button>
-
-        <button onclick="openWhatsapp('phone2')" class="btn-whatsapp p-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all">
-          <i class="fa-brands fa-whatsapp text-2xl"></i>
-          <div class="text-left">
-            <p class="text-xs uppercase tracking-widest">WhatsApp</p>
-            <p class="text-lg font-black">+57 310 7746755</p>
-          </div>
-        </button>
-
-        <button onclick="openWhatsapp('phone3')" class="btn-whatsapp p-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all">
-          <i class="fa-brands fa-whatsapp text-2xl"></i>
-          <div class="text-left">
-            <p class="text-xs uppercase tracking-widest">WhatsApp</p>
-            <p class="text-lg font-black">+57 313 5103746</p>
-          </div>
-        </button>
-
-        <button onclick="openEmail()" class="bg-champagne hover:bg-champagne-light text-elegant-black p-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all">
-          <i class="fa-solid fa-envelope text-2xl"></i>
-          <div class="text-left">
-            <p class="text-xs uppercase tracking-widest">Correo</p>
-            <p class="text-lg font-black">Envíanos un mensaje</p>
-          </div>
-        </button>
-      </div>
-
-      <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-champagne/30 text-center space-y-2">
-        <p class="text-sm font-semibold text-champagne-light">Correo de Contacto:</p>
-        <p class="text-lg font-black text-champagne">CARTAGENAPLAZA@HOTELCARTAGENAPLAZA.CO</p>
-      </div>
-
-      <!-- Message Template -->
-      <div class="bg-warm-white/10 backdrop-blur-md rounded-xl p-6 border border-champagne/30 space-y-3 text-sm">
-        <p class="font-bold text-champagne uppercase tracking-widest">Mensaje Sugerido:</p>
-        <p class="text-warm-white italic">
-          "Hola, estoy interesado en la Cena de San Silvestre 2026 del Hotel Cartagena Plaza. Quisiera conocer la disponibilidad de entradas y los planes de las zonas Sahara, Oasis y Nomad. Gracias."
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-elegant-black text-warm-white border-t border-champagne/20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-      <div class="grid md:grid-cols-4 gap-8">
-        <div class="space-y-3">
-          <div class="flex items-center gap-2">
-            <div class="w-10 h-10 rounded-full bg-champagne flex items-center justify-center text-elegant-black font-bold">
-              <i class="fa-solid fa-door-open"></i>
-            </div>
-            <p class="font-bold">Hotel Cartagena Plaza</p>
-          </div>
-          <p class="text-xs text-champagne-light">Cena de San Silvestre 2026</p>
-        </div>
-
-        <div class="space-y-3">
-          <p class="font-bold uppercase tracking-widest text-champagne text-xs">Navegación</p>
-          <ul class="space-y-2 text-sm">
-            <li><a href="#hero" class="hover:text-champagne transition-colors">Inicio</a></li>
-            <li><a href="#prices" class="hover:text-champagne transition-colors">Precios</a></li>
-            <li><a href="#experience" class="hover:text-champagne transition-colors">Experiencia</a></li>
-            <li><a href="#contact" class="hover:text-champagne transition-colors">Contacto</a></li>
-          </ul>
-        </div>
-
-        <div class="space-y-3">
-          <p class="font-bold uppercase tracking-widest text-champagne text-xs">Contacto</p>
-          <ul class="space-y-2 text-sm text-champagne-light">
-            <li><i class="fa-brands fa-whatsapp"></i> +57 322 7228707</li>
-            <li><i class="fa-brands fa-whatsapp"></i> +57 310 7746755</li>
-            <li><i class="fa-brands fa-whatsapp"></i> +57 313 5103746</li>
-          </ul>
-        </div>
-
-        <div class="space-y-3">
-          <p class="font-bold uppercase tracking-widest text-champagne text-xs">Ubicación</p>
-          <p class="text-sm text-champagne-light">
-            Playa del Hotel Cartagena Plaza<br>
-            Cartagena de Indias, Colombia
+        <!-- Título Principal -->
+        <div class="space-y-2">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-serif text-white leading-tight">
+            Cena San Silvestre <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-200">2026</span>
+          </h1>
+          <p class="text-lg sm:text-2xl font-serif text-amber-200/90 font-bold">
+            Hotel Cartagena Plaza
           </p>
-          <button onclick="openMaps()" class="text-sm font-semibold text-champagne hover:text-champagne-light transition-colors">
-            Ver ubicación →
+        </div>
+
+        <!-- Descripción Promocional -->
+        <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-medium">
+          Despide el 2026 y recibe el nuevo año con una noche inolvidable frente al mar Caribe en la 
+          <strong class="text-amber-300">Playa del Hotel Cartagena Plaza</strong>. Concierto en vivo, DJ, cena buffet internacional, fuegos pirotécnicos y reserva de mesas en tiempo real.
+        </p>
+
+        <!-- Destacado Fecha Oficial & Etapa Activa -->
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-amber-400/40 shadow-lg">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex flex-col items-center justify-center font-black leading-none">
+              <span class="text-base font-extrabold">31</span>
+              <span class="text-[9px] uppercase tracking-wider">DIC</span>
+            </div>
+            <div>
+              <div class="text-xs uppercase font-extrabold tracking-wider text-amber-300">Fecha Oficial del Evento</div>
+              <div class="text-sm sm:text-base font-extrabold text-white">Jueves, 31 de Diciembre de 2026 • 19:00 hs</div>
+            </div>
+          </div>
+
+          <div id="current-stage-badge"></div>
+        </div>
+
+        <!-- Botones de Llamada a la Acción -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <a href="#mapa-reserva" class="px-6 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-xl shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+            <i class="fa-solid fa-chair text-sm"></i> Reservar Puestos en el Mapa
+          </a>
+          <a href="#prices" class="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm rounded-2xl border border-white/20 backdrop-blur-md transition-all flex items-center gap-2">
+            <i class="fa-solid fa-tags"></i> Ver Precios & Etapas
+          </a>
+          <button onclick="appController.handleShareReceipt()" class="px-4 py-3.5 bg-emerald-600/90 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center gap-2">
+            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
           </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- CUENTA REGRESIVA AL 31 DE DICIEMBRE DE 2026 -->
+    <section id="countdown" class="bg-gradient-to-r from-slate-900 via-stone-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white text-center space-y-6 border border-amber-500/20 shadow-xl">
+      <div class="space-y-1">
+        <span class="text-[11px] uppercase tracking-widest text-amber-400 font-extrabold">✦ Conteo Regresivo Oficial ✦</span>
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-white">
+          Faltan para la Celebración
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto">
+        <div class="bg-white/5 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-amber-500/20 space-y-1">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-amber-400" id="countdown-days">00</div>
+          <div class="text-[10px] sm:text-xs uppercase font-extrabold text-slate-400 tracking-wider">Días</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-amber-500/20 space-y-1">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-amber-400" id="countdown-hours">00</div>
+          <div class="text-[10px] sm:text-xs uppercase font-extrabold text-slate-400 tracking-wider">Horas</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-amber-500/20 space-y-1">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-amber-400" id="countdown-minutes">00</div>
+          <div class="text-[10px] sm:text-xs uppercase font-extrabold text-slate-400 tracking-wider">Minutos</div>
+        </div>
+        <div class="bg-white/5 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-amber-500/20 space-y-1">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-amber-400" id="countdown-seconds">00</div>
+          <div class="text-[10px] sm:text-xs uppercase font-extrabold text-slate-400 tracking-wider">Segundos</div>
+        </div>
+      </div>
+      <p class="text-xs text-amber-200/80 font-semibold" id="countdown-msg">
+        ¡Asegura tus puestos con tarifa de Preventa antes del 15 de octubre!
+      </p>
+    </section>
+
+    <!-- ==================== PLANO INTERACTIVO & RESERVA EN VIVO ==================== -->
+    <section id="mapa-reserva" class="space-y-6 scroll-mt-24">
+      
+      <div class="text-center space-y-2">
+        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+          <i class="fa-solid fa-satellite-dish mr-1 text-emerald-500"></i> Sistema Interactivo en Vivo
+        </span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black font-serif text-slate-900 dark:text-white">
+          Plano de Mesas & Selección de Puestos
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Haz clic en cualquier silla disponible para elegir si es entrada para <strong class="text-amber-600 dark:text-amber-400">Adulto</strong> o <strong class="text-sky-600 dark:text-sky-400">Niño (4 a 11 años)</strong> con su respectiva tarifa.
+        </p>
+      </div>
+
+      <!-- Layout: Carrito Lateral Izquierdo + Plano Central de la Playa -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Panel Lateral Izquierdo: Selección & Carrito -->
+        <div class="lg:col-span-4 bg-white dark:bg-slate-800 rounded-3xl p-5 sm:p-6 border border-amber-200/60 dark:border-slate-700 shadow-sm space-y-4 sticky top-24">
+          
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+            <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <i class="fa-solid fa-cart-shopping text-amber-600 dark:text-amber-400"></i> Tu Selección
+            </h3>
+            <span id="selected-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+              0
+            </span>
+          </div>
+
+          <!-- Selector de Etapa de Precio (Preventa / Etapa 2 / Precio Full) -->
+          <div class="space-y-1.5 bg-slate-50 dark:bg-slate-700/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-600">
+            <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+              Etapa de Precios Activa:
+            </label>
+            <div class="grid grid-cols-3 gap-1">
+              <button type="button" onclick="appController.handleSetStage('PREVENTA')" id="stage-btn-preventa" class="py-1.5 px-2 rounded-xl text-[10px] font-black transition-all bg-amber-500 text-slate-950 shadow-sm">
+                Preventa
+              </button>
+              <button type="button" onclick="appController.handleSetStage('ETAPA_2')" id="stage-btn-etapa2" class="py-1.5 px-2 rounded-xl text-[10px] font-black transition-all bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200">
+                Etapa 2
+              </button>
+              <button type="button" onclick="appController.handleSetStage('FULL')" id="stage-btn-full" class="py-1.5 px-2 rounded-xl text-[10px] font-black transition-all bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200">
+                Precio Full
+              </button>
+            </div>
+            <p class="text-[9px] text-slate-400 text-center pt-0.5">
+              Preventa hasta 15 Oct • Etapa 2 (16-30 Nov) • Full desde 1 Dic
+            </p>
+          </div>
+
+          <!-- Temporizador de Reserva (Hold Timer - 5 min) -->
+          <div id="timer-display" class="timer bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 p-2.5 rounded-xl text-xs font-black text-center border border-amber-200 dark:border-amber-800 transition-all">
+            ⏱️ Tiempo de Reserva: 05:00
+          </div>
+
+          <!-- Lista de Sillas Seleccionadas -->
+          <div id="selected-list" class="min-h-[120px]">
+            <div class="p-6 text-center text-slate-400 dark:text-slate-500 space-y-2">
+              <i class="fa-solid fa-chair text-3xl opacity-40"></i>
+              <p class="text-xs font-semibold">Haz clic en los puestos verdes del mapa para seleccionar tus sillas (Adulto o Niño).</p>
+            </div>
+          </div>
+
+          <!-- Resumen de Pago -->
+          <div class="border-t border-slate-100 dark:border-slate-700 pt-3 space-y-2">
+            <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Impuestos & Servicios:</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400">Incluidos</span>
+            </div>
+            <div class="flex items-center justify-between text-base">
+              <span class="font-extrabold text-slate-800 dark:text-slate-200">Total a Pagar:</span>
+              <span id="total-price" class="font-mono font-black text-xl text-amber-600 dark:text-amber-400">$0 COP</span>
+            </div>
+          </div>
+
+          <!-- Botón de Checkout -->
+          <button id="btn-checkout" onclick="appController.handleStartCheckout()" disabled class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-slate-950 rounded-2xl font-black text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-receipt"></i> Confirmar Puestos & Pagar
+          </button>
+        </div>
+
+        <!-- Área Central: Plano de la Playa según Imagen 2 -->
+        <!-- Escenario -> Sahara -> Oasis -> Nomad -> Zona Lounge -->
+        <div class="lg:col-span-8 bg-white dark:bg-slate-800 rounded-3xl p-5 sm:p-6 border border-amber-200/60 dark:border-slate-700 shadow-sm space-y-6 relative">
+          
+          <!-- Banners Laterales de Orientación Espacial (Imagen 2) -->
+          <div class="flex items-center justify-between text-[11px] font-black uppercase tracking-wider px-3 py-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-xl text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+            <span><i class="fa-solid fa-hotel text-amber-500 mr-1"></i> HOTEL CARTAGENA PLAZA</span>
+            <span class="hidden sm:inline font-mono text-amber-600 dark:text-amber-400">✦ DISTRIBUCIÓN OFICIAL PLAYA ✦</span>
+            <span><i class="fa-solid fa-umbrella-beach text-sky-500 mr-1"></i> ZONA DE PLAYA</span>
+          </div>
+
+          <!-- Escenario Principal (Top de la imagen) -->
+          <div class="stage-banner p-4 text-center text-xs sm:text-sm font-black text-white rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-2 border-amber-400/50 shadow-md">
+            <i class="fa-solid fa-microphone-lines text-amber-400 mr-2"></i> ESCENARIO PRINCIPAL (SHOW & CONCIERTO EN VIVO) <i class="fa-solid fa-music text-amber-400 ml-2"></i>
+          </div>
+
+          <!-- Leyenda de Estados en Tiempo Real -->
+          <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-bold py-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-200/60 dark:border-slate-700">
+            <span class="flex items-center"><i class="dot available"></i> Disponible</span>
+            <span class="flex items-center"><i class="dot selected"></i> Tu Selección</span>
+            <span class="flex items-center"><i class="dot locked"></i> Bloqueado (5 min)</span>
+            <span class="flex items-center"><i class="dot sold"></i> Vendido</span>
+          </div>
+
+          <!-- Acordeones / Secciones de Zonas (Sahara, Oasis, Nomad) -->
+          <div id="zones" class="space-y-4 scroll-mt-24">
+            
+            <!-- 1. ZONA SAHARA (Primera Fila VIP - Dorado) -->
+            <div class="zone-accordion border-2 border-amber-400/80 rounded-2xl overflow-hidden shadow-sm">
+              <button type="button" id="zone-header-sahara" onclick="appController.handleToggleZone('sahara')" class="w-full px-5 py-4 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <span class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-sm font-black shadow-sm">
+                    <i class="fa-solid fa-sun"></i>
+                  </span>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-black text-sm sm:text-base text-slate-900 dark:text-white font-serif">Zona Sahara</h3>
+                      <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">Primera Línea VIP</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
+                      Mesas A1 a B5 • Frente al Escenario • 10 Mesas (100 Puestos)
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span id="price-header-sahara" class="hidden sm:inline-block text-xs font-mono font-black text-amber-700 dark:text-amber-300">
+                    Adulto: $1.050.000 | Niño: $420.000
+                  </span>
+                  <i id="zone-icon-sahara" class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
+                </div>
+              </button>
+              <div id="zone-content-sahara" class="p-6 bg-white dark:bg-slate-800 border-t border-amber-200 dark:border-amber-900/40">
+                <div class="tables-grid" id="tables-zone-sahara"></div>
+              </div>
+            </div>
+
+            <!-- 2. ZONA OASIS (Área Central - Vino / Rojizo) -->
+            <div class="zone-accordion border-2 border-red-700/80 rounded-2xl overflow-hidden shadow-sm">
+              <button type="button" id="zone-header-oasis" onclick="appController.handleToggleZone('oasis')" class="w-full px-5 py-4 bg-gradient-to-r from-red-800/20 via-red-700/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <span class="w-9 h-9 rounded-xl bg-red-800 text-white flex items-center justify-center text-sm font-black shadow-sm">
+                    <i class="fa-solid fa-water"></i>
+                  </span>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-black text-sm sm:text-base text-slate-900 dark:text-white font-serif">Zona Oasis</h3>
+                      <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-800 text-white">Preferencial</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
+                      Mesas C1 a H5 • Área Central • 30 Mesas (300 Puestos)
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span id="price-header-oasis" class="hidden sm:inline-block text-xs font-mono font-black text-red-700 dark:text-red-300">
+                    Adulto: $950.000 | Niño: $420.000
+                  </span>
+                  <i id="zone-icon-oasis" class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                </div>
+              </button>
+              <div id="zone-content-oasis" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-red-200 dark:border-red-900/40">
+                <div class="tables-grid" id="tables-zone-oasis"></div>
+              </div>
+            </div>
+
+            <!-- 3. ZONA NOMAD (Área General - Bronce / Marrón) -->
+            <div class="zone-accordion border-2 border-amber-900/80 rounded-2xl overflow-hidden shadow-sm">
+              <button type="button" id="zone-header-nomad" onclick="appController.handleToggleZone('nomad')" class="w-full px-5 py-4 bg-gradient-to-r from-amber-900/20 via-amber-800/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <span class="w-9 h-9 rounded-xl bg-amber-900 text-white flex items-center justify-center text-sm font-black shadow-sm">
+                    <i class="fa-solid fa-campground"></i>
+                  </span>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-black text-sm sm:text-base text-slate-900 dark:text-white font-serif">Zona Nomad</h3>
+                      <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-900 text-white">Acceso General</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
+                      Mesas I1 a L5 • Acceso a Zona Lounge • 20 Mesas (200 Puestos)
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span id="price-header-nomad" class="hidden sm:inline-block text-xs font-mono font-black text-amber-800 dark:text-amber-300">
+                    Adulto: $850.000 | Niño: $420.000
+                  </span>
+                  <i id="zone-icon-nomad" class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                </div>
+              </button>
+              <div id="zone-content-nomad" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-amber-900/30">
+                <div class="tables-grid" id="tables-zone-nomad"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Zona Lounge (Al fondo según Imagen 2) -->
+          <div class="p-3.5 text-center text-xs font-black text-white rounded-2xl bg-gradient-to-r from-cyan-900 via-teal-800 to-cyan-900 border border-teal-500/40">
+            <i class="fa-solid fa-martini-glass-citrus mr-1.5 text-teal-300"></i> ZONA LOUNGE (COCTELES & ESPACIO DE INTEGRACIÓN)
+          </div>
+
+          <!-- Indicador de Ubicación en Playa -->
+          <div class="p-3 rounded-2xl bg-amber-50 dark:bg-slate-700/50 border border-amber-200 dark:border-slate-600 flex items-center justify-center gap-2 text-xs font-bold text-amber-950 dark:text-amber-200">
+            <i class="fa-solid fa-location-dot text-rose-500 text-sm"></i>
+            <span>PLAYA DEL HOTEL CARTAGENA PLAZA • CARTAGENA DE INDIAS</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== TABLA OFICIAL DE PRECIOS Y PLANES (IMAGEN 1) ==================== -->
+    <section id="prices" class="space-y-6 scroll-mt-24">
+      <div class="text-center space-y-2">
+        <span class="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">✦ Tarifas Oficiales ✦</span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black font-serif text-slate-900 dark:text-white">
+          Planes y Precios por Etapas
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Precios por persona en Pesos Colombianos (COP). Incluyen cena buffet, bebidas, show musical y acceso completo.
+        </p>
+      </div>
+
+      <!-- Tabla Estructurada Conforme a Imagen 1 -->
+      <div class="overflow-x-auto rounded-3xl border border-amber-200/80 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="border-b border-amber-200 dark:border-slate-700 bg-slate-950 text-white">
+              <th class="py-4 px-4 text-left font-black uppercase tracking-wider text-xs">Zona / Plan</th>
+              <th class="py-4 px-4 font-black uppercase tracking-wider text-xs">Tipo de Entrada</th>
+              <th id="th-col-preventa" class="py-4 px-4 font-black uppercase tracking-wider text-xs bg-amber-500/20 text-amber-300">
+                PREVENTA<br><span class="text-[10px] font-normal text-slate-300">(Hasta el 15 de oct)</span>
+              </th>
+              <th id="th-col-etapa_2" class="py-4 px-4 font-black uppercase tracking-wider text-xs">
+                ETAPA 2<br><span class="text-[10px] font-normal text-slate-400">(16 de oct al 30 de nov)</span>
+              </th>
+              <th id="th-col-full" class="py-4 px-4 font-black uppercase tracking-wider text-xs">
+                PRECIO FULL<br><span class="text-[10px] font-normal text-slate-400">(A partir del 1 de dic)</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-xs sm:text-sm">
+            
+            <!-- SAHARA -->
+            <tr class="bg-amber-50/50 dark:bg-amber-950/20 font-bold">
+              <td rowspan="2" class="py-4 px-4 text-left font-black text-amber-900 dark:text-amber-300 border-r border-amber-200 dark:border-slate-700">
+                <span class="text-base font-serif block">SAHARA</span>
+                <span class="text-[10px] font-bold text-slate-500">Primera Línea frente a Tarima</span>
+              </td>
+              <td class="py-3 px-4 font-black text-slate-900 dark:text-slate-100">ADULTO</td>
+              <td class="py-3 px-4 font-black font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10">$1.050.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.100.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.200.000</td>
+            </tr>
+            <tr class="bg-amber-50/20 dark:bg-amber-950/10">
+              <td class="py-3 px-4 font-bold text-slate-600 dark:text-slate-300">
+                NIÑO <span class="text-[10px] text-slate-500 block sm:inline">(4 a 11 años)</span>
+              </td>
+              <td class="py-3 px-4 font-black font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10">$420.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$490.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$550.000</td>
+            </tr>
+
+            <!-- OASIS -->
+            <tr class="bg-red-50/40 dark:bg-red-950/20 font-bold">
+              <td rowspan="2" class="py-4 px-4 text-left font-black text-red-900 dark:text-red-300 border-r border-red-200 dark:border-slate-700">
+                <span class="text-base font-serif block">OASIS</span>
+                <span class="text-[10px] font-bold text-slate-500">Área Central Preferencial</span>
+              </td>
+              <td class="py-3 px-4 font-black text-slate-900 dark:text-slate-100">ADULTO</td>
+              <td class="py-3 px-4 font-black font-mono text-red-700 dark:text-red-400 bg-amber-500/10">$950.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.000.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.100.000</td>
+            </tr>
+            <tr class="bg-red-50/20 dark:bg-red-950/10">
+              <td class="py-3 px-4 font-bold text-slate-600 dark:text-slate-300">
+                NIÑO <span class="text-[10px] text-slate-500 block sm:inline">(4 a 11 años)</span>
+              </td>
+              <td class="py-3 px-4 font-black font-mono text-red-700 dark:text-red-400 bg-amber-500/10">$420.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$490.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$550.000</td>
+            </tr>
+
+            <!-- NOMAD -->
+            <tr class="bg-amber-900/5 dark:bg-amber-900/20 font-bold">
+              <td rowspan="2" class="py-4 px-4 text-left font-black text-amber-950 dark:text-amber-200 border-r border-amber-900/20 dark:border-slate-700">
+                <span class="text-base font-serif block">NOMAD</span>
+                <span class="text-[10px] font-bold text-slate-500">Área General & Lounge</span>
+              </td>
+              <td class="py-3 px-4 font-black text-slate-900 dark:text-slate-100">ADULTO</td>
+              <td class="py-3 px-4 font-black font-mono text-amber-800 dark:text-amber-300 bg-amber-500/10">$850.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$900.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.000.000</td>
+            </tr>
+            <tr class="bg-amber-900/5 dark:bg-amber-900/10">
+              <td class="py-3 px-4 font-bold text-slate-600 dark:text-slate-300">
+                NIÑO <span class="text-[10px] text-slate-500 block sm:inline">(4 a 11 años)</span>
+              </td>
+              <td class="py-3 px-4 font-black font-mono text-amber-800 dark:text-amber-300 bg-amber-500/10">$420.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$490.000</td>
+              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$550.000</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Notas Aclaratorias sobre Edades -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-xs">
+        <div class="p-3 bg-amber-50 dark:bg-slate-800 rounded-2xl border border-amber-200 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300">
+          <i class="fa-solid fa-check text-emerald-500 mr-1"></i> Adulto: a partir de los 12 años
+        </div>
+        <div class="p-3 bg-amber-50 dark:bg-slate-800 rounded-2xl border border-amber-200 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300">
+          <i class="fa-solid fa-child text-sky-500 mr-1"></i> Niño: de 4 a 11 años cumplidos
+        </div>
+        <div class="p-3 bg-amber-50 dark:bg-slate-800 rounded-2xl border border-amber-200 dark:border-slate-700 font-semibold text-slate-700 dark:text-slate-300">
+          <i class="fa-solid fa-baby text-amber-500 mr-1"></i> Menores de 4 años gratis (sin asiento exclusivo)
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ¿QUÉ INCLUYE LA EXPERIENCIA? (IMAGEN 3) ==================== -->
+    <section id="experience" class="space-y-6 scroll-mt-24">
+      <div class="text-center space-y-2">
+        <span class="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">✦ Todo Incluido ✦</span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black font-serif text-slate-900 dark:text-white">
+          INCLUYE
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Cada entrada a la Cena de San Silvestre cuenta con los siguientes beneficios exclusivos:
+        </p>
+      </div>
+
+      <!-- 9 Elementos de la Imagen 3 -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-3">
+        
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Cena Buffet</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-wine-glass"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Coctel de Bienvenida</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-music"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Concierto en Vivo</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-compact-disc"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">DJ en Vivo</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Cotillones</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-wine-bottle"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Uvas de la Prosperidad</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-burst"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Fuegos Pirotécnicos</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-mug-hot"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Caldo de Amanecida</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-700 shadow-sm text-center space-y-2 hover:border-amber-400 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <p class="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200 leading-tight">Set Fotográfico</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== CONTACTO & CANALES DE BOLETERÍA ==================== -->
+    <section id="contact" class="bg-slate-900 rounded-3xl p-6 sm:p-10 text-white space-y-8 border border-amber-500/20 shadow-xl scroll-mt-24">
+      <div class="text-center space-y-2">
+        <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">✦ Asesoría Personalizada ✦</span>
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-white">
+          Contacto y Líneas de Boletería
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+          ¿Deseas atención directa o asistencia con tu reserva? Escríbenos a nuestras líneas autorizadas de WhatsApp.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <a href="https://wa.me/573227228707?text=Hola,%20deseo%20informaci%C3%B3n%20sobre%20la%20Cena%20San%20Silvestre%202026%20en%20el%20Hotel%20Cartagena%20Plaza" target="_blank" class="p-4 rounded-2xl bg-white/5 hover:bg-emerald-600/20 border border-emerald-500/30 transition-all flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shrink-0">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Línea 1</div>
+            <div class="text-sm font-black text-white">+57 322 722 8707</div>
+          </div>
+        </a>
+
+        <a href="https://wa.me/573107746755?text=Hola,%20deseo%20informaci%C3%B3n%20sobre%20la%20Cena%20San%20Silvestre%202026%20en%20el%20Hotel%20Cartagena%20Plaza" target="_blank" class="p-4 rounded-2xl bg-white/5 hover:bg-emerald-600/20 border border-emerald-500/30 transition-all flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shrink-0">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Línea 2</div>
+            <div class="text-sm font-black text-white">+57 310 774 6755</div>
+          </div>
+        </a>
+
+        <a href="https://wa.me/573135103746?text=Hola,%20deseo%20informaci%C3%B3n%20sobre%20la%20Cena%20San%20Silvestre%202026%20en%20el%20Hotel%20Cartagena%20Plaza" target="_blank" class="p-4 rounded-2xl bg-white/5 hover:bg-emerald-600/20 border border-emerald-500/30 transition-all flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shrink-0">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Línea 3</div>
+            <div class="text-sm font-black text-white">+57 313 510 3746</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="text-center pt-2">
+        <p class="text-xs text-amber-300/80 font-mono">
+          Correo Oficial: <a href="mailto:CARTAGENAPLAZA@HOTELCARTAGENAPLAZA.CO" class="underline font-bold">CARTAGENAPLAZA@HOTELCARTAGENAPLAZA.CO</a>
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== VISTA 2: MIS BOLETAS COMPRADAS ==================== -->
+  <main id="view-my-tickets" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white font-serif">Mis Boletas Compradas</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Consulta tus comprobantes digitales y códigos QR oficiales para el ingreso al evento.</p>
+      </div>
+      <button onclick="appController.handleNavigate('client')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Plano
+      </button>
+    </div>
+
+    <div id="my-tickets-container"></div>
+  </main>
+
+  <!-- ==================== VISTA 3: PANEL DE ADMINISTRADOR ==================== -->
+  <main id="view-admin" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white font-serif">Panel de Control Administrador</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Métricas en tiempo real, gestión de ventas de boletas y control de personal Staff.</p>
+      </div>
+      <button onclick="appController.handleNavigate('client')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+        <i class="fa-solid fa-chair"></i> Ir al Plano para Apartar / Vender
+      </button>
+    </div>
+
+    <!-- Métricas en Vivo -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sillas Vendidas</span>
+        <div class="text-xl font-black text-slate-900 dark:text-white" id="stat-sillas-vendidas">0 / 600</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ocupación</span>
+        <div class="text-xl font-black text-amber-600 dark:text-amber-400" id="stat-porcentaje">0%</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1 col-span-2 sm:col-span-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Ingresos</span>
+        <div class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="stat-total-ingresado">$0 COP</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-amber-200/80 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Adultos</span>
+        <div class="text-xl font-black text-slate-800 dark:text-slate-100" id="stat-adultos-vendidos">0</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-sky-200/80 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-sky-600">Niños (4-11)</span>
+        <div class="text-xl font-black text-slate-800 dark:text-slate-100" id="stat-ninos-vendidos">0</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pendientes</span>
+        <div class="text-xl font-black text-amber-500" id="stat-pendientes">0</div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ingresadas</span>
+        <div class="text-xl font-black text-sky-500" id="stat-ingresadas">0</div>
+      </div>
+    </div>
+
+    <!-- Módulo de Control de Etapas y Precios Automáticos por Fecha -->
+    <div class="bg-gradient-to-r from-amber-500/10 via-amber-600/5 to-transparent bg-white dark:bg-slate-800 rounded-3xl p-6 border-2 border-amber-300 dark:border-amber-900/60 shadow-sm space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">✦ Control Tarifario y Fechas ✦</span>
+          <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 mt-0.5">
+            <i class="fa-solid fa-calendar-check text-amber-600"></i> Etapa de Precios del Evento
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
+            Los valores cambian automáticamente de acuerdo a la fecha del calendario oficial (Preventa hasta el 15 Oct, Etapa 2 del 16 Oct al 30 Nov, Precio Full desde el 1 Dic 2026). Puedes dejar el modo automático o forzar una etapa manual.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span id="admin-current-stage-pill" class="px-4 py-2 rounded-2xl text-xs font-black bg-amber-500 text-slate-950 shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-clock"></i> <span id="admin-current-stage-text">Preventa Activa</span>
+          </span>
         </div>
       </div>
 
-      <div class="border-t border-champagne/20 pt-8 text-center space-y-2">
-        <p class="text-sm text-champagne-light">
-          Cena de San Silvestre 2026 | Hotel Cartagena Plaza
+      <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+        <label for="admin-stage-select" class="text-xs font-black text-slate-700 dark:text-slate-300">Modo de Cobro:</label>
+        <select id="admin-stage-select" onchange="appController.handleAdminChangeStage(this.value)" class="px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-400 cursor-pointer">
+          <option value="AUTO">⚡ Automático por Fecha (Recomendado según día actual)</option>
+          <option value="PREVENTA">🟡 Forzar Preventa (Hasta el 15 de oct)</option>
+          <option value="ETAPA_2">🟠 Forzar Etapa 2 (16 de oct al 30 de nov)</option>
+          <option value="FULL">🔴 Forzar Precio Full (A partir del 1 de dic)</option>
+        </select>
+        <span id="admin-stage-status-desc" class="text-xs text-slate-500 dark:text-slate-400 font-semibold italic"></span>
+      </div>
+    </div>
+
+    <!-- Tabla de Ventas en Vivo -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-amber-600"></i> Historial de Ventas en Vivo & Tipos de Boleta
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-700">
+              <th class="py-3 px-4">Código</th>
+              <th class="py-3 px-4">Cliente</th>
+              <th class="py-3 px-4 text-center">Entradas</th>
+              <th class="py-3 px-4">Tipo (Adulto / Niño)</th>
+              <th class="py-3 px-4">Puestos</th>
+              <th class="py-3 px-4">Total Pagado</th>
+              <th class="py-3 px-4">Fecha / Hora</th>
+              <th class="py-3 px-4">Estado</th>
+              <th class="py-3 px-4 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="admin-sales-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Personal Staff -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-emerald-500"></i> Crear Nuevo Validador Staff
+        </h3>
+        <form onsubmit="appController.handleCreateStaffSubmit(event)" class="space-y-3">
+          <div class="flex items-center gap-3">
+            <img id="newStaffAvatarPreview" src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120" class="w-12 h-12 rounded-2xl object-cover border border-slate-200 shrink-0">
+            <label class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer transition-all">
+              <i class="fa-solid fa-camera"></i> Subir Foto
+              <input type="file" accept="image/*" class="hidden" onchange="appController.handleStaffAvatarSelected(event)">
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="stf-nombre" placeholder="Nombre" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+            <input type="text" id="stf-apellido" placeholder="Apellido" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Puerta & Zonas de Acceso Asignadas *</label>
+            <select id="stf-door" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+              <option value="Puerta 1 - Acceso VIP Sahara">🚪 Puerta 1 - Acceso VIP Sahara (Mesas A y B)</option>
+              <option value="Puerta 2 - Acceso Preferencial Oasis">🚪 Puerta 2 - Acceso Preferencial Oasis (Mesas C a H)</option>
+              <option value="Puerta 3 - Acceso General Nomad">🚪 Puerta 3 - Acceso General Nomad (Mesas I a L)</option>
+              <option value="Puerta Principal / Acceso Total">🚪 Puerta Principal / Acceso Total (Todas las Zonas)</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="stf-username" placeholder="Username" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+            <input type="password" id="stf-password" placeholder="Contraseña" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition-all">
+            Guardar Personal Staff
+          </button>
+        </form>
+      </div>
+
+      <div class="lg:col-span-7 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-users-gear text-amber-500"></i> Personal Staff Autorizado
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-700">
+                <th class="py-2.5 px-4">Validador</th>
+                <th class="py-2.5 px-4">Usuario</th>
+                <th class="py-2.5 px-4">Puerta / Control</th>
+                <th class="py-2.5 px-4 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="admin-staff-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== VISTA 4: MÓDULO ESCÁNER STAFF & ADMIN ==================== -->
+  <main id="view-staff" class="hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300">
+            Control Anti-Fraude
+          </span>
+          <span id="scanner-role-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 border border-amber-300">
+            Validador Activo
+          </span>
+        </div>
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white font-serif mt-1">
+          Módulo de Validación de Entradas QR
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Escanea el código QR de los comprobantes oficiales o valida por código alfanumérico para registrar acceso en tiempo real.
         </p>
-        <p class="text-xs text-champagne/60">
-          © 2026 Hotel Cartagena Plaza. Todos los derechos reservados.
+      </div>
+
+      <!-- Botón de retorno inteligente (cambia según si es Admin o Staff) -->
+      <button id="btn-scanner-return" onclick="appController.handleNavigate('client')" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm shrink-0">
+        <i class="fa-solid fa-arrow-left"></i> <span>Volver al Plano</span>
+      </button>
+    </div>
+
+    <!-- Tarjeta Principal del Validador -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+      
+      <!-- Pestañas de Métodos de Escaneo -->
+      <div class="flex flex-wrap border-b border-slate-200 dark:border-slate-700 pb-2 gap-2 text-xs font-bold">
+        <button id="tab-scan-camera-btn" onclick="appController.handleSwitchScannerTab('camera')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black shadow-sm transition-all">
+          <i class="fa-solid fa-camera"></i> Escanear con Cámara
+        </button>
+        <button id="tab-scan-file-btn" onclick="appController.handleSwitchScannerTab('file')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all">
+          <i class="fa-solid fa-image"></i> Subir Foto / Archivo QR
+        </button>
+        <button id="tab-scan-manual-btn" onclick="appController.handleSwitchScannerTab('manual')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all">
+          <i class="fa-solid fa-keyboard"></i> Código Manual
+        </button>
+      </div>
+
+      <!-- PANEL 1: CÁMARA EN VIVO -->
+      <div id="panel-scanner-camera" class="space-y-4">
+        <div class="max-w-md mx-auto">
+          <!-- Visor de la Cámara -->
+          <div class="relative overflow-hidden rounded-2xl border-2 border-slate-300 dark:border-slate-700 bg-slate-950 min-h-[320px] w-full flex flex-col items-center justify-center">
+            
+            <div id="reader" class="w-full min-h-[320px] flex items-center justify-center"></div>
+            
+            <!-- Estado previo antes de encender cámara -->
+            <div id="camera-idle-placeholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-slate-300 bg-slate-900/95 space-y-3 z-10">
+              <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-3xl border border-amber-500/30">
+                <i class="fa-solid fa-camera"></i>
+              </div>
+              <div>
+                <h4 class="font-black text-sm text-white">Cámara Lista para Escanear</h4>
+                <p class="text-xs text-slate-400 mt-1 max-w-xs">Presiona el botón para encender la cámara y apuntar al código QR de la entrada.</p>
+              </div>
+              <button onclick="appController.handleStartCameraScan()" class="px-5 py-3 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs rounded-xl shadow-lg transition-all flex items-center gap-2">
+                <i class="fa-solid fa-play"></i> Encender Cámara
+              </button>
+            </div>
+
+            <!-- Error de Cámara (si no hay permisos o no hay webcam) -->
+            <div id="camera-error-banner" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-slate-900/98 text-slate-200 space-y-3 z-20">
+              <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl border border-rose-500/40">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div>
+                <h4 class="font-black text-sm text-rose-300">Permiso o Cámara no Detectada</h4>
+                <p id="camera-error-msg" class="text-xs text-slate-300 mt-1 max-w-xs leading-relaxed">
+                  No se pudo abrir la cámara web en este dispositivo.
+                </p>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
+                <button onclick="appController.handleSwitchScannerTab('file')" class="flex-1 py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all">
+                  Subir Foto QR
+                </button>
+                <button onclick="appController.handleSwitchScannerTab('manual')" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold border border-slate-700 transition-all">
+                  Ingresar Código
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Controles de Cámara Activa -->
+          <div id="camera-active-controls" class="hidden mt-3 flex items-center justify-center gap-3">
+            <button onclick="appController.handleStopCameraScan()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-stop"></i> Detener Cámara
+            </button>
+            <button onclick="appController.handleToggleCameraDevice()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-300 dark:border-slate-600">
+              <i class="fa-solid fa-camera-rotate"></i> Cambiar Lente
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: SUBIR FOTO / ARCHIVO QR -->
+      <div id="panel-scanner-file" class="hidden space-y-4 max-w-md mx-auto">
+        <label for="input-qr-file" class="border-2 border-dashed border-amber-300 dark:border-slate-600 hover:border-amber-500 rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer bg-amber-50/20 dark:bg-slate-900/40 transition-all group">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-3xl mb-3 transition-all">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <span class="font-extrabold text-sm text-slate-800 dark:text-white">Haz clic aquí para seleccionar una imagen con QR</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400 mt-1">Soporta fotos, capturas de pantalla o PDF en formato JPG, PNG, WEBP</span>
+          <span class="mt-3 px-4 py-1.5 bg-amber-500 text-slate-950 rounded-xl font-black text-xs">Examinar Archivo</span>
+          <input type="file" id="input-qr-file" accept="image/*" class="hidden" onchange="appController.handleQrFileScan(event)">
+        </label>
+        <p class="text-[11px] text-center text-slate-400">El sistema procesará el código QR de la imagen de inmediato.</p>
+      </div>
+
+      <!-- PANEL 3: CÓDIGO MANUAL & PRUEBAS RÁPIDAS -->
+      <div id="panel-scanner-manual" class="space-y-4 max-w-lg mx-auto">
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Ingreso de Código de Entrada o Referencia:
+          </label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="input-manual-code" placeholder="Ej: OPN-491028 o ORD-91028" class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-mono font-bold uppercase focus:ring-2 focus:ring-amber-400">
+            <button onclick="appController.handleValidateManualCode()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shrink-0">
+              <i class="fa-solid fa-check"></i> Validar
+            </button>
+          </div>
+        </div>
+
+        <!-- Pruebas Rápidas con 1 Clic -->
+        <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+          <span class="font-bold text-slate-500 dark:text-slate-400 text-[11px] block">
+            ⚡ Pruebas rápidas (Códigos precargados en el sistema):
+          </span>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="appController.handleQuickTestCode('OPN-491028')" class="px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/60 hover:bg-amber-200 text-amber-900 dark:text-amber-300 border border-amber-300 font-mono font-bold text-[11px]">
+              OPN-491028 (Sahara VIP)
+            </button>
+            <button type="button" onclick="appController.handleQuickTestCode('OPN-773104')" class="px-2.5 py-1 rounded-lg bg-red-100 dark:bg-red-950/60 hover:bg-red-200 text-red-900 dark:text-red-300 border border-red-300 font-mono font-bold text-[11px]">
+              OPN-773104 (Oasis Preferencial)
+            </button>
+            <button type="button" onclick="appController.handleQuickTestCode('OPN-ERR999')" class="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-300 font-mono font-bold text-[11px]">
+              OPN-ERR999 (Código Falso)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta de Resultado de Validación -->
+      <div id="scan-result-card" class="hidden max-w-lg mx-auto"></div>
+
+    </div>
+  </main>
+
+  <!-- ==================== PANTALLA EMERGENTE (MODAL) PARA ELEGIR ADULTO O NIÑO ==================== -->
+  <div id="seat-type-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 border-2 border-amber-400/60 dark:border-amber-500/40 shadow-2xl animate-in fade-in zoom-in duration-200">
+      
+      <!-- Encabezado del Modal -->
+      <div class="flex items-start justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <div class="space-y-1">
+          <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
+            Seleccionar Tipo de Entrada
+          </span>
+          <div class="flex items-center gap-2">
+            <h3 class="text-xl font-black text-slate-900 dark:text-white font-serif">
+              Puesto <span id="modal-seat-id" class="text-amber-600 dark:text-amber-400 font-mono"></span>
+            </h3>
+            <span id="modal-seat-zone" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500 text-slate-900"></span>
+          </div>
+          <p id="modal-seat-stage" class="text-xs text-slate-500 dark:text-slate-400 font-bold"></p>
+        </div>
+        <button onclick="appView.closeSeatTypeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Opciones de Selección (Adulto vs Niño) -->
+      <div class="space-y-3">
+        <p class="text-xs font-bold text-slate-600 dark:text-slate-300">
+          ¿Para quién es este puesto? Selecciona una opción:
         </p>
-        <p class="text-xs text-champagne/60">
-          Jueves, 31 de Diciembre de 2026
-        </p>
+
+        <!-- Tarjeta Adulto -->
+        <div id="modal-card-adult" class="group p-4 rounded-2xl border-2 border-amber-400/60 hover:border-amber-500 bg-amber-50/50 dark:bg-amber-950/30 hover:bg-amber-100/60 dark:hover:bg-amber-950/50 cursor-pointer transition-all flex items-center justify-between gap-3 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-xl font-black shrink-0 shadow-sm">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-black text-sm text-slate-900 dark:text-white">ADULTO</span>
+                <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300">(A partir de 12 años)</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                Incluye cena buffet, coctel, show, cotillones y todas las actividades.
+              </p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-base font-black font-mono text-amber-700 dark:text-amber-400" id="modal-price-adult">$1.050.000</div>
+            <span class="text-[9px] font-bold text-slate-400 uppercase">Elegir Adulto →</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta Niño (4 a 11 años) -->
+        <div id="modal-card-child" class="group p-4 rounded-2xl border-2 border-sky-400/60 hover:border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 hover:bg-sky-100/60 dark:hover:bg-sky-950/50 cursor-pointer transition-all flex items-center justify-between gap-3 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-sky-500 text-white flex items-center justify-center text-xl font-black shrink-0 shadow-sm">
+              <i class="fa-solid fa-child"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-black text-sm text-slate-900 dark:text-white">NIÑO</span>
+                <span class="text-[10px] font-bold text-sky-700 dark:text-sky-300">(4 a 11 años)</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                Menú infantil y actividades especiales de fin de año.
+              </p>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-base font-black font-mono text-sky-700 dark:text-sky-400" id="modal-price-child">$420.000</div>
+            <span class="text-[9px] font-bold text-slate-400 uppercase">Elegir Niño →</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Nota para menores de 4 años -->
+      <div class="p-3 bg-slate-100 dark:bg-slate-700/60 rounded-xl text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-amber-500 mt-0.5"></i>
+        <span>Los <strong>menores de 4 años</strong> ingresan sin costo y no requieren boleta individual (no tienen asiento exclusivo asignado).</span>
+      </div>
+
+      <div class="text-center pt-1">
+        <button type="button" onclick="appView.closeSeatTypeModal()" class="text-xs text-slate-400 hover:text-slate-600 font-bold">
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE CHECKOUT & PAGO ==================== -->
+  <div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 border border-slate-200 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 font-serif">
+          <i class="fa-solid fa-credit-card text-amber-600"></i> Confirmar Reserva & Datos
+        </h3>
+        <button onclick="appController.handleCloseCheckoutModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="appController.handleConfirmPayment(event)" class="space-y-4">
+        
+        <div class="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-900 space-y-1.5 text-xs">
+          <div class="text-slate-500 dark:text-slate-400 font-semibold">
+            <span>Puestos Seleccionados:</span>
+            <div id="checkoutSeatsList" class="font-extrabold text-slate-900 dark:text-slate-100 pt-0.5"></div>
+          </div>
+          <div class="flex justify-between items-center text-slate-700 dark:text-slate-200 font-extrabold text-sm pt-2 border-t border-amber-200/60 dark:border-amber-900/60">
+            <span>Monto Total Oficial:</span>
+            <span id="checkoutTotalBadge" class="font-mono font-black text-amber-600 dark:text-amber-400 text-base"></span>
+          </div>
+        </div>
+
+        <div class="space-y-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label>Nombre Completo del Titular *</label>
+          <input type="text" id="checkoutBuyerName" required placeholder="Tu Nombre y Apellido" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-400">
+        </div>
+
+        <div class="space-y-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label>Correo Electrónico (para envío de boletas) *</label>
+          <input type="email" id="checkoutBuyerEmail" required placeholder="correo@ejemplo.com" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <div>
+            <label>Teléfono Celular *</label>
+            <input type="tel" id="checkoutBuyerPhone" placeholder="300 123 4567" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-400">
+          </div>
+          <div>
+            <label>Método de Pago</label>
+            <select id="checkoutPaymentMethod" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-400">
+              <option value="Transferencia Bancolombia">Bancolombia</option>
+              <option value="Transferencia Nequi">Nequi</option>
+              <option value="Pago en Taquilla Hotel">Taquilla Hotel Cartagena Plaza</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label>N° Comprobante / Referencia de Pago</label>
+          <input type="text" id="checkoutReceiptRef" placeholder="Ej: BANCOL-948102 o N° Transacción" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-400">
+        </div>
+
+        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 rounded-2xl font-black text-xs shadow-lg shadow-amber-500/20 transition-all">
+          Confirmar Compra y Generar Comprobante QR
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE COMPROBANTE OFICIAL & QR ==================== -->
+  <div id="ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 border border-amber-300 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Área Imprimible del Boleto Oficial -->
+      <div id="ticket-print-area" class="space-y-4 p-5 bg-amber-50/40 dark:bg-slate-900/60 rounded-2xl border border-amber-200 dark:border-slate-700 text-xs">
+        
+        <div class="text-center border-b border-amber-200 dark:border-slate-700 pb-3">
+          <span class="text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 block">
+            HOTEL CARTAGENA PLAZA • EM HOTELS
+          </span>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1 font-serif">
+            Cena San Silvestre 2026
+          </h2>
+          <p class="text-[11px] text-slate-500">
+            Jueves, 31 de Diciembre de 2026 • Playa del Hotel Cartagena Plaza
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div><strong class="text-slate-400 block text-[9px] uppercase">ID Pedido:</strong> <span id="lbl-id-pedido" class="font-mono font-bold"></span></div>
+          <div><strong class="text-slate-400 block text-[9px] uppercase">Titular:</strong> <span id="lbl-nombre-cliente" class="font-bold"></span></div>
+          <div><strong class="text-slate-400 block text-[9px] uppercase">Fecha de Emisión:</strong> <span id="lbl-fecha-hora" class="font-semibold"></span></div>
+          <div><strong class="text-slate-400 block text-[9px] uppercase">Código Compra:</strong> <span id="lbl-codigo-compra" class="font-mono font-black text-amber-600 dark:text-amber-400"></span></div>
+        </div>
+
+        <div class="p-3 bg-amber-100/70 dark:bg-amber-950/40 rounded-2xl border border-amber-300 dark:border-amber-900/60 flex items-center justify-between gap-2">
+          <div>
+            <strong class="text-amber-800 dark:text-amber-300 block text-[9px] uppercase font-black">Puerta de Ingreso Asignada:</strong>
+            <span id="lbl-puerta-asignada" class="font-extrabold text-slate-900 dark:text-slate-100 text-xs">Puerta 1 - Acceso VIP Sahara</span>
+          </div>
+          <span id="lbl-zona-nombre" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500 text-slate-950 shrink-0">
+            Zona Sahara VIP
+          </span>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-amber-200 dark:border-slate-700 space-y-1">
+          <strong class="text-slate-400 block text-[9px] uppercase">Puestos Asignados & Tipo:</strong>
+          <div id="lbl-puestos-detalles" class="font-extrabold text-slate-900 dark:text-slate-100 text-xs leading-relaxed"></div>
+          <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700 text-xs">
+            <span class="font-bold">Total Pagado:</span>
+            <span id="lbl-valor-pagar" class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm"></span>
+          </div>
+        </div>
+
+        <!-- Código QR Canvas -->
+        <div class="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-800 rounded-xl border border-amber-200 dark:border-slate-700">
+          <div id="qr-canvas-wrapper" class="p-2 bg-white rounded-lg shadow-sm"></div>
+          <span class="text-[9px] text-slate-400 font-mono mt-1">CÓDIGO DE VALIDACIÓN ANTI-FRAUDE EN PUERTA</span>
+        </div>
+      </div>
+
+      <!-- Acciones del Comprobante -->
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="appController.handleDownloadPdf()" class="py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+          <i class="fa-solid fa-file-pdf"></i> Guardar PDF
+        </button>
+        <button onclick="appController.handleShareReceipt()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
+          <i class="fa-brands fa-whatsapp"></i> Compartir
+        </button>
+        <button onclick="appController.handleCloseReceiptModal()" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE AUTENTICACIÓN CLIENTE ==================== -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl">
+      
+      <!-- Encabezado Informativo de Acceso -->
+      <div class="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-3">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-user-lock text-base"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-black text-slate-900 dark:text-white leading-tight">Acceso de Cliente</h3>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Inicia sesión para seleccionar y comprar tus puestos</p>
+        </div>
+      </div>
+
+      <div class="flex border-b border-slate-200 dark:border-slate-700 pb-1">
+        <button id="tab-login-btn" onclick="appController.handleSwitchAuthTab('login')" class="flex-1 py-2 text-xs font-bold text-amber-600 border-b-2 border-amber-600">
+          Iniciar Sesión
+        </button>
+        <button id="tab-register-btn" onclick="appController.handleSwitchAuthTab('register')" class="flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent">
+          Registrarse
+        </button>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <button type="button" onclick="appController.handleGooglePromptOrDemo()" class="w-full py-3 px-4 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-2 border-amber-200 dark:border-slate-600 rounded-2xl text-xs font-black text-slate-800 dark:text-white shadow-sm transition-all flex items-center justify-center gap-3">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>Continuar con Google</span>
+        </button>
+
+        <div class="relative flex items-center justify-center py-1">
+          <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
+          <span class="bg-white dark:bg-slate-800 px-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider absolute">o con correo</span>
+        </div>
+      </div>
+
+      <!-- Formulario Login -->
+      <form id="form-login" onsubmit="appController.handleLoginSubmit(event)" class="space-y-3">
+        <input type="email" id="login-email" placeholder="Correo electrónico" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-400">
+        <input type="password" id="login-password" placeholder="Contraseña" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-400">
+        <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all">
+          Ingresar
+        </button>
+      </form>
+
+      <!-- Formulario Registro -->
+      <form id="form-register" onsubmit="appController.handleRegisterSubmit(event)" class="hidden space-y-3">
+        <div class="flex items-center gap-3">
+          <img id="regAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120" class="w-10 h-10 rounded-full object-cover border border-slate-200">
+          <label class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-bold cursor-pointer transition-all">
+            <i class="fa-solid fa-camera"></i> Subir Foto
+            <input type="file" accept="image/*" class="hidden" onchange="appController.handleUserAvatarSelected(event)">
+          </label>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="reg-name" placeholder="Nombre" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+          <input type="text" id="reg-lastname" placeholder="Apellido" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        </div>
+        <input type="email" id="reg-email" placeholder="Correo electrónico" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="password" id="reg-password" placeholder="Contraseña" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="password" id="reg-confirm-password" placeholder="Confirmar contraseña" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all">
+          Crear Cuenta
+        </button>
+      </form>
+
+      <div class="text-center pt-1">
+        <button onclick="appController.handleCloseAuthModal()" class="text-xs text-slate-400 hover:text-slate-600">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL PORTAL ADMIN & STAFF ==================== -->
+  <div id="portal-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl">
+      
+      <div class="flex border-b border-slate-200 dark:border-slate-700 pb-1">
+        <button id="tab-portal-admin-btn" onclick="appController.handleSwitchPortalTab('admin')" class="flex-1 py-2 text-xs font-bold text-amber-600 border-b-2 border-amber-600">
+          Administrador
+        </button>
+        <button id="tab-portal-staff-btn" onclick="appController.handleSwitchPortalTab('staff')" class="flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent">
+          Validador Staff
+        </button>
+      </div>
+
+      <!-- Login Admin -->
+      <form id="form-portal-admin" onsubmit="appController.handleAdminLoginSubmit(event)" class="space-y-3">
+        <input type="text" id="admin-user" value="admindos" placeholder="Usuario Admin" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="password" id="admin-pass" value="emhotelsadmin31" placeholder="Contraseña" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all">
+          Acceder como Administrador
+        </button>
+      </form>
+
+      <!-- Login Staff -->
+      <form id="form-portal-staff" onsubmit="appController.handleStaffLoginSubmit(event)" class="hidden space-y-3">
+        <input type="text" id="staff-user" value="puerta1" placeholder="Username Staff" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="password" id="staff-pass" value="puerta123password" placeholder="Contraseña Staff" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all">
+          Acceder como Validador Staff
+        </button>
+      </form>
+
+      <div class="text-center pt-2">
+        <button onclick="appController.handleClosePortalModal()" class="text-xs text-slate-400 hover:text-slate-600">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Notificaciones Toast -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- ==================== FOOTER OFICIAL ==================== -->
+  <footer class="bg-slate-950 text-white border-t border-amber-500/20 py-10 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+      <div class="flex items-center justify-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black">
+          <i class="fa-solid fa-hotel text-sm"></i>
+        </div>
+        <span class="font-serif text-lg font-black tracking-tight text-white">Hotel Cartagena Plaza</span>
+        <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">• EM HOTELS</span>
+      </div>
+      <p class="text-xs text-slate-400 max-w-lg mx-auto">
+        Cena San Silvestre 2026 • Jueves, 31 de Diciembre de 2026<br>
+        Playa del Hotel Cartagena Plaza • Cartagena de Indias D.T. y C. - RNT 5286
+      </p>
+      <div class="text-[11px] text-slate-500 pt-2 border-t border-slate-800">
+        © 2026 Hotel Cartagena Plaza. Todos los derechos reservados.
       </div>
     </div>
   </footer>
 
-  <!-- ==================== SCRIPTS ==================== -->
+  <!-- Lógica de Cuenta Regresiva al 31 de Diciembre de 2026 -->
   <script>
-    // Countdown Timer
-    function updateCountdown() {
-      const targetDate = new Date('2026-12-31T00:00:00').getTime();
-      
-      function calculate() {
+    function startEventCountdown() {
+      const target = new Date('2026-12-31T19:00:00').getTime();
+      function update() {
         const now = new Date().getTime();
-        const distance = targetDate - now;
-
-        if (distance > 0) {
-          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-          document.getElementById('days').textContent = String(days).padStart(2, '0');
-          document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-          document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-          document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-        } else {
-          document.getElementById('countdown-message').textContent = '¡Ha llegado el momento de celebrar! 🎉';
-          document.getElementById('days').textContent = '00';
-          document.getElementById('hours').textContent = '00';
-          document.getElementById('minutes').textContent = '00';
-          document.getElementById('seconds').textContent = '00';
+        const diff = target - now;
+        if (diff > 0) {
+          const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const s = Math.floor((diff % (1000 * 60)) / 1000);
+          const elD = document.getElementById('countdown-days');
+          const elH = document.getElementById('countdown-hours');
+          const elM = document.getElementById('countdown-minutes');
+          const elS = document.getElementById('countdown-seconds');
+          if (elD) elD.textContent = String(d).padStart(2, '0');
+          if (elH) elH.textContent = String(h).padStart(2, '0');
+          if (elM) elM.textContent = String(m).padStart(2, '0');
+          if (elS) elS.textContent = String(s).padStart(2, '0');
         }
       }
-
-      calculate();
-      setInterval(calculate, 1000);
+      update();
+      setInterval(update, 1000);
     }
-
-    // WhatsApp Message Generator
-    function openWhatsapp(type) {
-      const phones = {
-        'phone1': '573227228707',
-        'phone2': '573107746755',
-        'phone3': '573135103746',
-        'general': '573227228707'
-      };
-
-      const message = "Hola, estoy interesado en la Cena de San Silvestre 2026 del Hotel Cartagena Plaza. Quisiera conocer la disponibilidad de entradas y los planes de las zonas Sahara, Oasis y Nomad. Gracias.";
-      
-      const phone = phones[type];
-      const encodedMessage = encodeURIComponent(message);
-      const whatsappURL = `https://wa.me/${phone}?text=${encodedMessage}`;
-      
-      window.open(whatsappURL, '_blank');
-    }
-
-    function openEmail() {
-      window.location.href = 'mailto:CARTAGENAPLAZA@HOTELCARTAGENAPLAZA.CO?subject=Consulta%20Cena%20San%20Silvestre%202026';
-    }
-
-    function openMaps() {
-      window.open('https://www.google.com/maps/search/Hotel+Cartagena+Plaza+Cartagena+Colombia', '_blank');
-    }
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-      updateCountdown();
-    });
+    document.addEventListener('DOMContentLoaded', startEventCountdown);
   </script>
+
+  <!-- Barra Flotante de Retorno Rápido para Administrador -->
+  <div id="admin-floating-bar" class="hidden fixed bottom-6 right-6 z-50 animate-in fade-in zoom-in duration-300">
+    <button onclick="appController.handleNavigate('admin')" class="px-5 py-3.5 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs rounded-2xl shadow-2xl shadow-amber-950/40 border-2 border-amber-300 flex items-center gap-2.5 transform hover:scale-105 active:scale-95 transition-all">
+      <i class="fa-solid fa-chart-line text-sm"></i>
+      <span>Volver al Panel Administrador</span>
+    </button>
+  </div>
+
+  <!-- Módulos MVC (Carga en orden estricto) -->
+  <script src="js/config.js?v=4.3"></script>
+  <script src="js/models/TicketModel.js?v=4.3"></script>
+  <script src="js/views/TicketView.js?v=4.3"></script>
+  <script src="js/controllers/TicketController.js?v=4.3"></script>
+  <script src="js/app.js?v=4.3"></script>
+
 </body>
 </html>

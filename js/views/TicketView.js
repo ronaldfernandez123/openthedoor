@@ -126,14 +126,15 @@ class TicketView {
       const seatId = `${tableId}-S${s}`;
       const state = seatsState[seatId];
       let statusClass = 'available';
-      let titleTooltip = `Puesto: ${seatId} | ${zoneConfig.name} | ${zoneConfig.door || 'Puerta'} | $${zoneConfig.price.toLocaleString('es-CO')} COP`;
+      const adultPrice = (zoneConfig && typeof zoneConfig.price === 'number') ? zoneConfig.price : 1050000;
+      let titleTooltip = `Puesto: ${seatId} | ${(zoneConfig && zoneConfig.name) || 'Zona'} | ${(zoneConfig && zoneConfig.door) || 'Puerta'} | $${adultPrice.toLocaleString('es-CO')} COP`;
 
       if (state) {
         if (state.status === 'sold') {
           statusClass = 'sold';
           titleTooltip = `Puesto: ${seatId} (VENDIDO)`;
         } else if (state.status === 'locked') {
-          if (socketId && state.userId === socketId) {
+          if ((socketId && state.userId === socketId) || state.userId === 'local-session') {
             statusClass = 'my-selection';
             titleTooltip = `Puesto: ${seatId} (Tu Selección - Bloqueado)`;
           } else {
@@ -190,7 +191,7 @@ class TicketView {
     `;
   }
 
-  renderSelectionSidebar(mySelectedSeats, getSeatPriceFn, lockExpiresAt) {
+  renderSelectionSidebar(mySelectedSeats, getSeatPriceFn, lockExpiresAt, getSeatTypeFn) {
     const listContainer = document.getElementById('selected-list');
     const totalEl = document.getElementById('total-price');
     const timerEl = document.getElementById('timer-display');
@@ -219,34 +220,43 @@ class TicketView {
 
     btnCheckout.disabled = false;
     let total = 0;
-    let html = '<div class="space-y-2 max-h-52 overflow-y-auto pr-1">';
+    let html = '<div class="space-y-2 max-h-56 overflow-y-auto pr-1">';
 
     mySelectedSeats.forEach(seatId => {
-      const price = getSeatPriceFn(seatId);
+      const type = getSeatTypeFn ? getSeatTypeFn(seatId) : 'ADULTO';
+      const price = getSeatPriceFn(seatId, type);
       total += price;
       const letter = seatId.charAt(0).toUpperCase();
-      let zoneName = "Zona Silver";
+      let zoneName = "Zona Nomad";
       let doorName = "Puerta 3";
-      let badgeClass = "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200";
+      let badgeClass = "bg-amber-900/10 text-amber-900 dark:text-amber-300 border border-amber-900/30";
 
       if (letter >= 'A' && letter <= 'B') {
-        zoneName = "Diamond VIP";
+        zoneName = "Sahara VIP";
         doorName = "Puerta 1 (VIP)";
-        badgeClass = "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300";
+        badgeClass = "bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/40";
       } else if (letter >= 'C' && letter <= 'H') {
-        zoneName = "Gold Preferencial";
-        doorName = "Puerta 2 (Gold)";
-        badgeClass = "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300";
+        zoneName = "Oasis Preferencial";
+        doorName = "Puerta 2 (Oasis)";
+        badgeClass = "bg-red-800/15 text-red-800 dark:text-red-300 border border-red-800/40";
       }
+
+      const isChild = type === 'NINO' || type === 'nino';
+      const typeBadge = isChild
+        ? `<button onclick="appController.handleOpenSeatTypeModal('${seatId}')" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 hover:bg-sky-200 transition-colors cursor-pointer" title="Clic para cambiar tipo">🧒 Niño (4-11)</button>`
+        : `<button onclick="appController.handleOpenSeatTypeModal('${seatId}')" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-200 transition-colors cursor-pointer" title="Clic para cambiar tipo">👤 Adulto</button>`;
 
       html += `
         <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700 text-xs">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-[10px]">
+            <span class="w-7 h-7 rounded-lg ${letter <= 'B' ? 'bg-amber-500 text-slate-900' : letter <= 'H' ? 'bg-red-800 text-white' : 'bg-amber-900 text-white'} flex items-center justify-center font-black text-[11px] shrink-0">
               <i class="fa-solid fa-chair"></i>
             </span>
             <div>
-              <div class="font-extrabold text-slate-800 dark:text-slate-100">${seatId}</div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-extrabold text-slate-900 dark:text-slate-100">${seatId}</span>
+                ${typeBadge}
+              </div>
               <div class="flex items-center gap-1 mt-0.5">
                 <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${badgeClass}">${zoneName}</span>
                 <span class="text-[9px] font-bold text-slate-400">🚪 ${doorName}</span>
@@ -254,7 +264,7 @@ class TicketView {
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">$${price.toLocaleString('es-CO')}</span>
+            <span class="font-mono font-bold text-amber-600 dark:text-amber-400">$${price.toLocaleString('es-CO')}</span>
             <button onclick="appController.handleToggleSeat('${seatId}')" class="text-slate-400 hover:text-rose-500 transition-colors p-1" title="Quitar puesto">
               <i class="fa-solid fa-trash-can text-xs"></i>
             </button>
@@ -290,6 +300,52 @@ class TicketView {
     }
   }
 
+  // --- MODAL DE SELECCIÓN ADULTO / NIÑO (PANTALLA EMERGENTE) ---
+  openSeatTypeModal(data) {
+    const modal = document.getElementById('seat-type-modal');
+    if (!modal) return;
+
+    const seatIdEl = document.getElementById('modal-seat-id');
+    const zoneNameEl = document.getElementById('modal-seat-zone');
+    const stageNameEl = document.getElementById('modal-seat-stage');
+    const priceAdultEl = document.getElementById('modal-price-adult');
+    const priceChildEl = document.getElementById('modal-price-child');
+    const cardAdult = document.getElementById('modal-card-adult');
+    const cardChild = document.getElementById('modal-card-child');
+
+    if (seatIdEl) seatIdEl.textContent = data.seatId;
+    if (zoneNameEl) {
+      zoneNameEl.textContent = data.zoneName;
+      zoneNameEl.className = `px-2.5 py-0.5 rounded-full text-xs font-black ${data.badgeClass || 'bg-amber-500 text-slate-900'}`;
+    }
+    if (stageNameEl) stageNameEl.textContent = `Etapa: ${data.stageName || 'Preventa'}`;
+    if (priceAdultEl) priceAdultEl.textContent = `$${data.priceAdult.toLocaleString('es-CO')} COP`;
+    if (priceChildEl) priceChildEl.textContent = `$${data.priceChild.toLocaleString('es-CO')} COP`;
+
+    if (cardAdult) {
+      cardAdult.onclick = () => {
+        if (typeof data.onSelect === 'function') data.onSelect(data.seatId, 'ADULTO');
+        this.closeSeatTypeModal();
+      };
+    }
+    if (cardChild) {
+      cardChild.onclick = () => {
+        if (typeof data.onSelect === 'function') data.onSelect(data.seatId, 'NINO');
+        this.closeSeatTypeModal();
+      };
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  closeSeatTypeModal() {
+    const modal = document.getElementById('seat-type-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
   // --- COMPROBANTE OFICIAL DE RESERVA (MODAL & PDF) ---
   renderReceiptModal(venta) {
     const modal = document.getElementById('ticket-modal');
@@ -299,13 +355,17 @@ class TicketView {
     document.getElementById('lbl-nombre-cliente').textContent = venta.cliente;
     document.getElementById('lbl-fecha-hora').textContent = venta.fechaHora;
     document.getElementById('lbl-codigo-compra').textContent = venta.codigoCompra;
-    document.getElementById('lbl-puestos-detalles').textContent = venta.puestos.join(', ');
+    const puestosTexto = (Array.isArray(venta.puestosDetalles) && venta.puestosDetalles.length > 0)
+      ? venta.puestosDetalles.map(d => `${d.puesto} (${d.tipo === 'NINO' ? 'Niño' : 'Adulto'})`).join(', ')
+      : (Array.isArray(venta.puestos) ? venta.puestos.join(', ') : '');
+
+    document.getElementById('lbl-puestos-detalles').textContent = puestosTexto;
     document.getElementById('lbl-valor-pagar').textContent = `$${venta.total.toLocaleString('es-CO')} COP`;
     
     // Puerta y Zona Asignada
     const puertaEl = document.getElementById('lbl-puerta-asignada');
     if (puertaEl) {
-      puertaEl.textContent = venta.puertaSugerida || 'Puerta 1 - Acceso VIP & Diamond';
+      puertaEl.textContent = venta.puertaSugerida || 'Puerta 1 - Acceso VIP Sahara';
     }
     const zonaEl = document.getElementById('lbl-zona-nombre');
     if (zonaEl) {
@@ -356,13 +416,13 @@ class TicketView {
     if (!tickets || tickets.length === 0) {
       container.innerHTML = `
         <div class="p-12 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-          <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto text-2xl">
+          <div class="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto text-2xl">
             <i class="fa-solid fa-ticket-simple"></i>
           </div>
           <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">No tienes boletos registrados aún</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">Selecciona tus mesas y puestos en el mapa principal para adquirir tus entradas en tiempo real.</p>
-          <button onclick="appController.handleNavigate('client')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition-all">
-            Ir al Mapa de Boletos
+          <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">Selecciona tus mesas y puestos en el plano principal para adquirir tus entradas en tiempo real.</p>
+          <button onclick="appController.handleNavigate('client')" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md transition-all">
+            Ir al Plano de Boletos
           </button>
         </div>
       `;
@@ -373,21 +433,21 @@ class TicketView {
     tickets.forEach(t => {
       const isUsed = t.usado;
       html += `
-        <div class="bg-white dark:bg-slate-800 rounded-3xl border ${isUsed ? 'border-slate-200 dark:border-slate-700 opacity-80' : 'border-indigo-100 dark:border-indigo-900 shadow-lg shadow-indigo-100/50 dark:shadow-none'} overflow-hidden p-6 space-y-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl border ${isUsed ? 'border-slate-200 dark:border-slate-700 opacity-80' : 'border-amber-200 dark:border-amber-900 shadow-lg dark:shadow-none'} overflow-hidden p-6 space-y-4">
           <div class="flex items-start justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
             <div>
               <div class="flex items-center gap-2">
                 <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${isUsed ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'}">
                   ${isUsed ? '● ENTRADA UTILIZADA' : '● ENTRADA VÁLIDA'}
                 </span>
-                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                   🚪 ${t.puertaSugerida || 'Puerta Asignada'}
                 </span>
               </div>
-              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 mt-1.5">Gran Gala & Concierto Exclusivo</h4>
+              <h4 class="text-sm font-black text-slate-900 dark:text-slate-100 mt-1.5">Cena San Silvestre 2026 - Hotel Cartagena Plaza</h4>
               <div class="text-[11px] text-slate-500 dark:text-slate-400"><i class="fa-regular fa-clock"></i> ${t.fechaHora}</div>
             </div>
-            <div class="font-mono font-black text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-xl border border-indigo-100 dark:border-indigo-900">
+            <div class="font-mono font-black text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl border border-amber-100 dark:border-amber-900">
               ${t.codigoCompra}
             </div>
           </div>
@@ -418,7 +478,7 @@ class TicketView {
   }
 
   // --- PANEL DE CONTROL ADMINISTRADOR ---
-  renderAdminPanel(adminData) {
+  renderAdminPanel(adminData, currentStage = 'PREVENTA', isAutoStage = true) {
     const sales = adminData.sales || [];
     const staffList = adminData.staffList || [];
     const totalCapacity = adminData.totalCapacity || 600;
@@ -427,12 +487,24 @@ class TicketView {
     let totalIngresado = 0;
     let pendientesCount = 0;
     let ingresadasCount = 0;
+    let adultosCount = 0;
+    let ninosCount = 0;
 
     sales.forEach(s => {
-      totalSillas += (s.numEntradas || s.puestos.length);
+      const num = (s.numEntradas || (Array.isArray(s.puestos) ? s.puestos.length : 1));
+      totalSillas += num;
       totalIngresado += (s.total || 0);
-      if (s.usado) ingresadasCount += (s.numEntradas || s.puestos.length);
-      else pendientesCount += (s.numEntradas || s.puestos.length);
+      if (s.usado) ingresadasCount += num;
+      else pendientesCount += num;
+
+      if (Array.isArray(s.puestosDetalles) && s.puestosDetalles.length > 0) {
+        s.puestosDetalles.forEach(pd => {
+          if (pd.tipo === 'NINO') ninosCount++;
+          else adultosCount++;
+        });
+      } else {
+        adultosCount += num;
+      }
     });
 
     const statSillas = document.getElementById('stat-sillas-vendidas');
@@ -440,28 +512,91 @@ class TicketView {
     const statTotal = document.getElementById('stat-total-ingresado');
     const statPendientes = document.getElementById('stat-pendientes');
     const statIngresadas = document.getElementById('stat-ingresadas');
+    const statAdultos = document.getElementById('stat-adultos-vendidos');
+    const statNinos = document.getElementById('stat-ninos-vendidos');
 
     if (statSillas) statSillas.textContent = `${totalSillas} / ${totalCapacity}`;
     if (statPorcentaje) statPorcentaje.textContent = `${((totalSillas / totalCapacity) * 100).toFixed(1)}%`;
     if (statTotal) statTotal.textContent = `$${totalIngresado.toLocaleString('es-CO')} COP`;
     if (statPendientes) statPendientes.textContent = pendientesCount;
     if (statIngresadas) statIngresadas.textContent = ingresadasCount;
+    if (statAdultos) statAdultos.textContent = adultosCount;
+    if (statNinos) statNinos.textContent = ninosCount;
+
+    // Actualizar indicador de etapa en panel admin
+    const stagePill = document.getElementById('admin-current-stage-pill');
+    const stageText = document.getElementById('admin-current-stage-text');
+    const stageSelect = document.getElementById('admin-stage-select');
+    const stageDesc = document.getElementById('admin-stage-status-desc');
+
+    const stageNames = {
+      PREVENTA: "Preventa (Hasta 15 Oct)",
+      ETAPA_2: "Etapa 2 (16 Oct - 30 Nov)",
+      FULL: "Precio Full (Desde 1 Dic)"
+    };
+
+    if (stageText) {
+      stageText.textContent = `${stageNames[currentStage] || currentStage} ${isAutoStage ? '• Modo Automático' : '• Forzado Manual'}`;
+    }
+    if (stagePill) {
+      if (currentStage === 'PREVENTA') {
+        stagePill.className = "px-4 py-2 rounded-2xl text-xs font-black bg-amber-500 text-slate-950 shadow-sm flex items-center gap-2";
+      } else if (currentStage === 'ETAPA_2') {
+        stagePill.className = "px-4 py-2 rounded-2xl text-xs font-black bg-orange-500 text-white shadow-sm flex items-center gap-2";
+      } else {
+        stagePill.className = "px-4 py-2 rounded-2xl text-xs font-black bg-red-600 text-white shadow-sm flex items-center gap-2";
+      }
+    }
+    if (stageSelect) {
+      stageSelect.value = isAutoStage ? 'AUTO' : currentStage;
+    }
+    if (stageDesc) {
+      stageDesc.textContent = isAutoStage 
+        ? "✓ Los precios cambian automáticamente según el reloj y calendario del sistema." 
+        : "⚠️ Modo manual activo: La etapa seleccionada está fija independientemente de la fecha.";
+    }
 
     // Tabla de Ventas en Vivo
     const tbody = document.getElementById('admin-sales-table');
     if (tbody) {
       if (sales.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">No hay compras registradas todavía.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-400">No hay compras registradas todavía.</td></tr>`;
       } else {
         let html = '';
         sales.forEach(s => {
+          let tiposHtml = '';
+          if (Array.isArray(s.puestosDetalles) && s.puestosDetalles.length > 0) {
+            tiposHtml = s.puestosDetalles.map(pd => `
+              <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${pd.tipo === 'NINO' ? 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'}">
+                ${pd.puesto}: ${pd.tipo === 'NINO' ? 'Niño' : 'Adulto'}
+              </span>
+            `).join(' ');
+          } else {
+            tiposHtml = '<span class="text-slate-400 text-[11px]">Adulto</span>';
+          }
+
+          const primaryZone = (s.zonas && s.zonas[0]) || 'NOMAD';
+          const zoneBadgeClass = primaryZone === 'SAHARA' 
+            ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30'
+            : (primaryZone === 'OASIS' ? 'bg-red-500/15 text-red-800 dark:text-red-300 border border-red-500/30' : 'bg-yellow-500/15 text-yellow-800 dark:text-yellow-300 border border-yellow-500/30');
+
+          const pList = Array.isArray(s.puestos) ? s.puestos : (Array.isArray(s.seatIds) ? s.seatIds : []);
           html += `
             <tr class="border-b border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors text-xs">
               <td class="py-3 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">${s.codigoCompra}</td>
-              <td class="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">${s.cliente}</td>
-              <td class="py-3 px-4 font-bold text-center">${s.numEntradas || s.puestos.length}</td>
-              <td class="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-300">${s.puestos.join(', ')}</td>
-              <td class="py-3 px-4 text-[11px] text-slate-500 font-bold">${s.puertaSugerida || 'Puerta 1'}</td>
+              <td class="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">
+                ${s.cliente}
+                ${s.telefono ? `<span class="block text-[10px] text-slate-400">${s.telefono}</span>` : ''}
+              </td>
+              <td class="py-3 px-4 font-bold text-center">${s.numEntradas || pList.length}</td>
+              <td class="py-3 px-4 space-x-1">${tiposHtml}</td>
+              <td class="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-300">
+                <span class="font-bold">${pList.join(', ')}</span>
+                <span class="block text-[10px] px-1.5 py-0.5 rounded border ${zoneBadgeClass} font-sans font-bold w-fit mt-0.5">
+                  ${s.zonaNombre || primaryZone} • ${s.puertaSugerida || 'Puerta Asignada'}
+                </span>
+              </td>
+              <td class="py-3 px-4 font-mono font-black text-emerald-600 dark:text-emerald-400">$${(s.total || 0).toLocaleString('es-CO')}</td>
               <td class="py-3 px-4 text-[11px] text-slate-500">${s.fechaHora}</td>
               <td class="py-3 px-4">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${s.usado ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'}">
@@ -521,46 +656,53 @@ class TicketView {
     const status = result.status || 'INVALID';
 
     const colors = {
-      VALID: "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100",
-      USED: "bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-100",
-      WRONG_DOOR: "bg-rose-50 dark:bg-rose-950/60 border-rose-400 dark:border-rose-800 text-rose-950 dark:text-rose-100",
-      INVALID: "bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-100"
+      VALID: "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-400 dark:border-emerald-700 text-emerald-950 dark:text-emerald-100",
+      USED: "bg-amber-50 dark:bg-amber-950/80 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-100",
+      WRONG_DOOR: "bg-rose-50 dark:bg-rose-950/80 border-rose-500 dark:border-rose-700 text-rose-950 dark:text-rose-100",
+      INVALID: "bg-rose-50 dark:bg-rose-950/80 border-rose-400 dark:border-rose-700 text-rose-950 dark:text-rose-100"
     };
 
     const icons = {
-      VALID: "fa-circle-check text-emerald-500",
-      USED: "fa-triangle-exclamation text-amber-500",
-      WRONG_DOOR: "fa-door-closed text-rose-600",
-      INVALID: "fa-circle-xmark text-rose-500"
+      VALID: "fa-circle-check text-emerald-500 text-3xl",
+      USED: "fa-triangle-exclamation text-amber-500 text-3xl",
+      WRONG_DOOR: "fa-door-closed text-rose-600 text-3xl",
+      INVALID: "fa-circle-xmark text-rose-500 text-3xl"
     };
 
     let guidanceHtml = '';
     if (status === 'WRONG_DOOR') {
       guidanceHtml = `
-        <div class="mt-3 p-3.5 bg-white dark:bg-slate-900 rounded-2xl border-2 border-rose-300 dark:border-rose-700 shadow-sm space-y-1">
+        <div class="mt-3 p-3 bg-white dark:bg-slate-900 rounded-2xl border-2 border-rose-400 dark:border-rose-600 shadow-sm space-y-1">
           <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-black text-xs uppercase tracking-wider">
-            <i class="fa-solid fa-location-arrow animate-bounce"></i> Dirección de Ingreso Correcta:
+            <i class="fa-solid fa-location-arrow animate-bounce"></i> Puerta Asignada Correcta:
           </div>
           <div class="text-sm font-extrabold text-slate-900 dark:text-white">
             👉 ${result.correctDoor || 'Puerta Asignada al Boleto'}
           </div>
           <div class="text-[11px] text-slate-500 dark:text-slate-400">
-            Zona del Boleto: <strong>${result.zonaNombre || 'Zona Oficial'}</strong>
+            Zona correspondiente: <strong>${result.zonaNombre || 'Zona Oficial'}</strong>
           </div>
         </div>
       `;
     }
 
-    resDiv.className = `p-4 rounded-3xl border-2 ${colors[status] || colors.INVALID} space-y-2 transition-all duration-300 shadow-lg`;
+    resDiv.className = `p-5 rounded-3xl border-2 ${colors[status] || colors.INVALID} space-y-3 transition-all duration-300 shadow-xl`;
     resDiv.innerHTML = `
-      <div class="flex items-start gap-3">
-        <i class="fa-solid ${icons[status] || icons.INVALID} text-2xl shrink-0 mt-0.5"></i>
-        <div class="flex-1">
-          <h4 class="font-black text-sm">${result.message}</h4>
-          <p class="text-xs opacity-90 mt-1 whitespace-pre-line leading-relaxed">${result.detail || ''}</p>
+      <div class="flex items-start gap-3.5">
+        <i class="fa-solid ${icons[status] || icons.INVALID} shrink-0 mt-0.5"></i>
+        <div class="flex-1 space-y-1">
+          <h4 class="font-black text-base">${result.message || 'Resultado de la Validación'}</h4>
+          <p class="text-xs opacity-90 whitespace-pre-line leading-relaxed font-medium">${result.detail || ''}</p>
           ${guidanceHtml}
         </div>
       </div>
+      <div class="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between">
+        <span class="text-[10px] uppercase font-bold tracking-wider opacity-60">Control de Acceso • Cartagena Plaza</span>
+        <button onclick="document.getElementById('scan-result-card').classList.add('hidden')" class="px-3 py-1 bg-white/80 dark:bg-slate-800/80 hover:bg-white text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-600 transition-all">
+          Cerrar Notificación
+        </button>
+      </div>
     `;
+    resDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
