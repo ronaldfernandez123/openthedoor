@@ -269,13 +269,9 @@ class TicketController {
         return;
       }
 
-      // Si se selecciona 'zones' o 'mapa-reserva', asegurar que el mapa esté desplegado y la zona visible
+      // Si se selecciona 'zones' o 'mapa-reserva', asegurar navegación directa
       if (sectionId === 'zones' || sectionId === 'mapa-reserva') {
         this.handleEnsureMapOpen();
-        const saharaContent = document.getElementById('zone-content-sahara');
-        if (saharaContent && saharaContent.classList.contains('hidden')) {
-          this.handleToggleZone('sahara');
-        }
       }
 
       const target = document.getElementById(sectionId);
@@ -348,17 +344,27 @@ class TicketController {
     const content = document.getElementById(`zone-content-${z}`);
     const header = document.getElementById(`zone-header-${z}`);
     const icon = document.getElementById(`zone-icon-${z}`);
+    const btnText = document.getElementById(`zone-btn-text-${z}`);
     if (!content) return;
 
     const isClosed = content.classList.contains('hidden');
     if (isClosed) {
       content.classList.remove('hidden');
-      if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
-      if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
+      if (icon) icon.className = "fa-solid fa-chevron-up text-[11px] transition-transform duration-300";
+      if (btnText) btnText.textContent = "Ocultar sillas";
+      if (header) {
+        header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
+        header.setAttribute('aria-expanded', 'true');
+      }
+      this.renderTableMap();
     } else {
       content.classList.add('hidden');
-      if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
-      if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
+      if (icon) icon.className = "fa-solid fa-chevron-down text-[11px] transition-transform duration-300";
+      if (btnText) btnText.textContent = "Ver sillas";
+      if (header) {
+        header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
+        header.setAttribute('aria-expanded', 'false');
+      }
     }
   }
 
@@ -379,9 +385,16 @@ class TicketController {
     const content = document.getElementById(`zone-content-${z}`);
     const header = document.getElementById(`zone-header-${z}`);
     const icon = document.getElementById(`zone-icon-${z}`);
+    const btnText = document.getElementById(`zone-btn-text-${z}`);
     if (content) content.classList.remove('hidden');
-    if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
-    if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
+    if (icon) icon.className = "fa-solid fa-chevron-up text-[11px] transition-transform duration-300";
+    if (btnText) btnText.textContent = "Ocultar sillas";
+    if (header) {
+      header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
+      header.setAttribute('aria-expanded', 'true');
+    }
+
+    this.renderTableMap();
 
     // Scroll suave hacia el encabezado de la zona
     const zoneHeader = document.getElementById(`zone-header-${z}`);

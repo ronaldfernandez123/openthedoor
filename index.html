@@ -280,52 +280,22 @@
       </p>
     </section>
 
-    <!-- ==================== MAPA DE ORGANIZACIÓN DE MESAS (DESPLEGABLE) ==================== -->
-    <section id="mapa-reserva" class="space-y-4 scroll-mt-24">
+    <!-- ==================== MAPA DE ORGANIZACIÓN DE MESAS ==================== -->
+    <section id="mapa-reserva" class="space-y-6 scroll-mt-24">
       
-      <!-- Botón / Encabezado Desplegable Principal -->
-      <div class="rounded-3xl border-2 border-amber-400/80 dark:border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-yellow-400/10 to-amber-500/15 dark:from-amber-950/60 dark:via-slate-800 dark:to-amber-950/60 shadow-lg p-2 sm:p-2.5 transition-all hover:border-amber-500 hover:shadow-amber-500/10">
-        <button type="button" 
-                id="btn-toggle-mapa" 
-                onclick="appController.handleToggleMap()" 
-                class="w-full p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left transition-all hover:bg-amber-500/10 dark:hover:bg-amber-500/10 cursor-pointer"
-                aria-expanded="true"
-                aria-controls="mapa-reserva-content">
-          
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-400 text-slate-950 flex items-center justify-center text-xl sm:text-2xl shadow-md shrink-0">
-              <i class="fa-solid fa-map-location-dot"></i>
-            </div>
-            <div>
-              <div class="flex flex-wrap items-center gap-2 mb-1">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-sm">
-                  <i class="fa-solid fa-satellite-dish mr-1 text-slate-950"></i> Interactivo en Vivo
-                </span>
-                <span class="text-[11px] font-bold text-amber-700 dark:text-amber-300">
-                  ✦ 60 Mesas • 600 Puestos ✦
-                </span>
-              </div>
-              <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 dark:text-white tracking-tight">
-                Mapa de organización de mesas
-              </h2>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
-                Selecciona tus puestos directamente en el plano interactivo (Adulto / Niño) o pulsa para plegar/desplegar el mapa.
-              </p>
-            </div>
-          </div>
-
-          <!-- Indicador Desplegable a la Derecha -->
-          <div class="flex items-center gap-3 self-end sm:self-center shrink-0">
-            <span id="mapa-toggle-label" class="px-5 py-2.5 rounded-full text-xs font-black bg-slate-950 text-white dark:bg-amber-500 dark:text-slate-950 shadow-md flex items-center gap-2 transition-transform hover:scale-105">
-              <span>Ocultar Mapa</span>
-              <i id="mapa-toggle-icon" class="fa-solid fa-chevron-up text-xs transition-transform duration-300"></i>
-            </span>
-          </div>
-        </button>
+      <div class="text-center space-y-2">
+        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-satellite-dish text-emerald-500"></i> Sistema Interactivo en Vivo
+        </span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black font-serif text-slate-900 dark:text-white">
+          Mapa de organización de mesas
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Haz clic en <strong class="text-amber-600 dark:text-amber-400">Ver sillas</strong> en cualquiera de las zonas para desplegar sus mesas, seleccionar tus puestos (Adulto o Niño) y agregarlos a tu compra.
+        </p>
       </div>
 
-      <!-- Contenedor Desplegable (Visible por defecto) -->
-      <div id="mapa-reserva-content" class="space-y-6 pt-2">
+      <div id="mapa-reserva-content" class="space-y-6">
         <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 text-center max-w-2xl mx-auto">
           Haz clic en cualquier silla disponible para elegir si es entrada para <strong class="text-amber-600 dark:text-amber-400">Adulto</strong> o <strong class="text-sky-600 dark:text-sky-400">Niño (4 a 11 años)</strong> con su respectiva tarifa.
         </p>
@@ -408,11 +378,6 @@
             <span><i class="fa-solid fa-umbrella-beach text-sky-500 mr-1"></i> ZONA DE PLAYA</span>
           </div>
 
-          <!-- Escenario Principal (Top de la imagen) -->
-          <div class="stage-banner p-4 text-center text-xs sm:text-sm font-black text-white rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-2 border-amber-400/50 shadow-md">
-            <i class="fa-solid fa-microphone-lines text-amber-400 mr-2"></i> ESCENARIO PRINCIPAL (SHOW & CONCIERTO EN VIVO) <i class="fa-solid fa-music text-amber-400 ml-2"></i>
-          </div>
-
           <!-- Leyenda de Estados en Tiempo Real -->
           <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-bold py-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-200/60 dark:border-slate-700">
             <span class="flex items-center"><i class="dot available"></i> Disponible</span>
@@ -421,15 +386,15 @@
             <span class="flex items-center"><i class="dot sold"></i> Vendido</span>
           </div>
 
-          <!-- Acordeones / Secciones de Zonas (Sahara, Oasis, Nomad) -->
+          <!-- Acordeones / Secciones Desplegables de Zonas (Sahara, Oasis, Nomad) -->
           <div id="zones" class="space-y-4 scroll-mt-24">
             
             <!-- 1. ZONA SAHARA (Primera Fila VIP - Dorado) -->
-            <div class="zone-accordion border-2 border-amber-400/80 rounded-2xl overflow-hidden shadow-sm">
-              <button type="button" id="zone-header-sahara" onclick="appController.handleToggleZone('sahara')" class="w-full px-5 py-4 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer">
+            <div class="zone-accordion border-2 border-amber-400/80 rounded-2xl overflow-hidden shadow-sm transition-all hover:border-amber-500">
+              <button type="button" id="zone-header-sahara" onclick="appController.handleToggleZone('sahara')" class="w-full px-5 py-4 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer" aria-expanded="false" aria-controls="zone-content-sahara">
                 <div class="flex items-center gap-3">
-                  <span class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-sm font-black shadow-sm">
-                    <i class="fa-solid fa-sun"></i>
+                  <span class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-sm font-black shadow-sm shrink-0">
+                    <i class="fa-solid fa-star"></i>
                   </span>
                   <div>
                     <div class="flex items-center gap-2">
@@ -437,27 +402,30 @@
                       <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">Primera Línea VIP</span>
                     </div>
                     <p class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
-                      Mesas A1 a B5 • Frente al Escenario • 10 Mesas (100 Puestos)
+                      Mesas A1 a B5 • 10 Mesas (100 Puestos)
                     </p>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <span id="price-header-sahara" class="hidden sm:inline-block text-xs font-mono font-black text-amber-700 dark:text-amber-300">
+                <div class="flex items-center gap-3 shrink-0">
+                  <span id="price-header-sahara" class="hidden md:inline-block text-xs font-mono font-black text-amber-700 dark:text-amber-300 mr-1">
                     Adulto: $1.050.000 | Niño: $420.000
                   </span>
-                  <i id="zone-icon-sahara" class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
+                  <span id="zone-btn-sahara" class="px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-500 text-slate-950 shadow-sm flex items-center gap-1.5 transition-transform hover:scale-105">
+                    <span id="zone-btn-text-sahara">Ver sillas</span>
+                    <i id="zone-icon-sahara" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-300"></i>
+                  </span>
                 </div>
               </button>
-              <div id="zone-content-sahara" class="p-6 bg-white dark:bg-slate-800 border-t border-amber-200 dark:border-amber-900/40">
+              <div id="zone-content-sahara" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-amber-200 dark:border-amber-900/40">
                 <div class="tables-grid" id="tables-zone-sahara"></div>
               </div>
             </div>
 
             <!-- 2. ZONA OASIS (Área Central - Vino / Rojizo) -->
-            <div class="zone-accordion border-2 border-red-700/80 rounded-2xl overflow-hidden shadow-sm">
-              <button type="button" id="zone-header-oasis" onclick="appController.handleToggleZone('oasis')" class="w-full px-5 py-4 bg-gradient-to-r from-red-800/20 via-red-700/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer">
+            <div class="zone-accordion border-2 border-red-700/80 rounded-2xl overflow-hidden shadow-sm transition-all hover:border-red-600">
+              <button type="button" id="zone-header-oasis" onclick="appController.handleToggleZone('oasis')" class="w-full px-5 py-4 bg-gradient-to-r from-red-800/20 via-red-700/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer" aria-expanded="false" aria-controls="zone-content-oasis">
                 <div class="flex items-center gap-3">
-                  <span class="w-9 h-9 rounded-xl bg-red-800 text-white flex items-center justify-center text-sm font-black shadow-sm">
+                  <span class="w-10 h-10 rounded-xl bg-red-800 text-white flex items-center justify-center text-sm font-black shadow-sm shrink-0">
                     <i class="fa-solid fa-water"></i>
                   </span>
                   <div>
@@ -466,27 +434,30 @@
                       <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-800 text-white">Preferencial</span>
                     </div>
                     <p class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
-                      Mesas C1 a H5 • Área Central • 30 Mesas (300 Puestos)
+                      Mesas C1 a H5 • 30 Mesas (300 Puestos)
                     </p>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <span id="price-header-oasis" class="hidden sm:inline-block text-xs font-mono font-black text-red-700 dark:text-red-300">
+                <div class="flex items-center gap-3 shrink-0">
+                  <span id="price-header-oasis" class="hidden md:inline-block text-xs font-mono font-black text-red-700 dark:text-red-300 mr-1">
                     Adulto: $950.000 | Niño: $420.000
                   </span>
-                  <i id="zone-icon-oasis" class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
+                  <span id="zone-btn-oasis" class="px-3.5 py-1.5 rounded-full text-xs font-black bg-red-800 text-white shadow-sm flex items-center gap-1.5 transition-transform hover:scale-105">
+                    <span id="zone-btn-text-oasis">Ver sillas</span>
+                    <i id="zone-icon-oasis" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-300"></i>
+                  </span>
                 </div>
               </button>
-              <div id="zone-content-oasis" class="p-6 bg-white dark:bg-slate-800 border-t border-red-200 dark:border-red-900/40">
+              <div id="zone-content-oasis" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-red-200 dark:border-red-900/40">
                 <div class="tables-grid" id="tables-zone-oasis"></div>
               </div>
             </div>
 
             <!-- 3. ZONA NOMAD (Área General - Bronce / Marrón) -->
-            <div class="zone-accordion border-2 border-amber-900/80 rounded-2xl overflow-hidden shadow-sm">
-              <button type="button" id="zone-header-nomad" onclick="appController.handleToggleZone('nomad')" class="w-full px-5 py-4 bg-gradient-to-r from-amber-900/20 via-amber-800/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer">
+            <div class="zone-accordion border-2 border-amber-900/80 rounded-2xl overflow-hidden shadow-sm transition-all hover:border-amber-800">
+              <button type="button" id="zone-header-nomad" onclick="appController.handleToggleZone('nomad')" class="w-full px-5 py-4 bg-gradient-to-r from-amber-900/20 via-amber-800/15 to-transparent text-left flex items-center justify-between transition-colors cursor-pointer" aria-expanded="false" aria-controls="zone-content-nomad">
                 <div class="flex items-center gap-3">
-                  <span class="w-9 h-9 rounded-xl bg-amber-900 text-white flex items-center justify-center text-sm font-black shadow-sm">
+                  <span class="w-10 h-10 rounded-xl bg-amber-900 text-white flex items-center justify-center text-sm font-black shadow-sm shrink-0">
                     <i class="fa-solid fa-campground"></i>
                   </span>
                   <div>
@@ -495,27 +466,25 @@
                       <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-900 text-white">Acceso General</span>
                     </div>
                     <p class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
-                      Mesas I1 a L5 • Acceso a Zona Lounge • 20 Mesas (200 Puestos)
+                      Mesas I1 a L5 • 20 Mesas (200 Puestos)
                     </p>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <span id="price-header-nomad" class="hidden sm:inline-block text-xs font-mono font-black text-amber-800 dark:text-amber-300">
+                <div class="flex items-center gap-3 shrink-0">
+                  <span id="price-header-nomad" class="hidden md:inline-block text-xs font-mono font-black text-amber-800 dark:text-amber-300 mr-1">
                     Adulto: $850.000 | Niño: $420.000
                   </span>
-                  <i id="zone-icon-nomad" class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
+                  <span id="zone-btn-nomad" class="px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-900 text-white shadow-sm flex items-center gap-1.5 transition-transform hover:scale-105">
+                    <span id="zone-btn-text-nomad">Ver sillas</span>
+                    <i id="zone-icon-nomad" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-300"></i>
+                  </span>
                 </div>
               </button>
-              <div id="zone-content-nomad" class="p-6 bg-white dark:bg-slate-800 border-t border-amber-900/30">
+              <div id="zone-content-nomad" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-amber-900/30">
                 <div class="tables-grid" id="tables-zone-nomad"></div>
               </div>
             </div>
 
-          </div>
-
-          <!-- Zona Lounge (Al fondo según Imagen 2) -->
-          <div class="p-3.5 text-center text-xs font-black text-white rounded-2xl bg-gradient-to-r from-cyan-900 via-teal-800 to-cyan-900 border border-teal-500/40">
-            <i class="fa-solid fa-martini-glass-citrus mr-1.5 text-teal-300"></i> ZONA LOUNGE (COCTELES & ESPACIO DE INTEGRACIÓN)
           </div>
 
           <!-- Indicador de Ubicación en Playa -->
