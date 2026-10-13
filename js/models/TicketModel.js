@@ -680,7 +680,7 @@ class TicketModel {
     this.socket.emit('STAFF_LOGIN', { username, password });
   }
 
-  validateTicketQr(code) {
+  async validateTicketQr(code) {
     if (!code) return;
     let cleanCode = String(code).trim();
     try {
@@ -694,6 +694,31 @@ class TicketModel {
       cleanCode = cleanCode.split('=').pop();
     }
     cleanCode = cleanCode.replace(/['"]/g, '').trim();
+
+    // Verificación Criptográfica HMAC-SHA256 (Anti-falsificación)
+    let isSigned = false;
+    let isSigValid = true;
+    if (typeof verifySignedQrToken === 'function') {
+      try {
+        const verifyRes = await verifySignedQrToken(cleanCode);
+        isSigned = verifyRes.isSigned;
+        isSigValid = verifyRes.isValid;
+        cleanCode = verifyRes.code;
+      } catch (err) {
+        console.warn('Error verificando token firmado:', err);
+      }
+    }
+
+    if (isSigned && !isSigValid) {
+      this.emit('validationResult', {
+        status: 'INVALID',
+        codigoIngresado: cleanCode,
+        isCryptographicallySigned: false,
+        message: '🚨 ¡ALERTA DE SEGURIDAD: CÓDIGO QR NO AUTORIZADO!',
+        detail: `La firma digital HMAC-SHA256 no coincide con la llave secreta del Hotel Cartagena Plaza.\n⚠️ Posible intento de falsificación o código QR alterado.`
+      });
+      return;
+    }
 
     const isRoleAdmin = Boolean(this.currentAdmin);
     const staff = this.currentStaff;
@@ -711,6 +736,7 @@ class TicketModel {
         this.emit('validationResult', { 
           status: 'INVALID', 
           codigoIngresado: cleanCode,
+          isCryptographicallySigned: isSigned,
           message: '❌ Código de Entrada No Válido o No Encontrado',
           detail: `El código "${cleanCode}" no coincide con ninguna boleta registrada en el sistema.`
         });
@@ -724,6 +750,7 @@ class TicketModel {
           this.emit('validationResult', {
             status: 'WRONG_DOOR',
             venta,
+            isCryptographicallySigned: isSigned,
             message: '🚪 Puerta de Ingreso Incorrecta',
             detail: `Este boleto pertenece a ${venta.zonaNombre || primaryZone}.\nEl asistente debe dirigirse a su puerta asignada.`,
             correctDoor: venta.puertaSugerida || 'Puerta Asignada',
@@ -737,6 +764,7 @@ class TicketModel {
         this.emit('validationResult', { 
           status: 'USED', 
           venta, 
+          isCryptographicallySigned: isSigned,
           message: '⚠️ Esta Entrada Ya Fue Utilizada Anteriormente',
           detail: `Ingreso previo registrado el ${venta.fechaEscaneo || 'Fecha anterior'} por @${venta.escaneadoPor || 'Staff'}.`
         });
@@ -755,6 +783,7 @@ class TicketModel {
       this.emit('validationResult', { 
         status: 'VALID', 
         venta,
+        isCryptographicallySigned: isSigned,
         message: '✅ ¡Acceso Autorizado!',
         detail: `Titular: ${venta.cliente}\nPuestos: ${puestosStr}\nZona: ${venta.zonaNombre || 'Zona Oficial'}\nPuerta: ${venta.puertaSugerida || 'Puerta Asignada'}`
       });
@@ -763,7 +792,7 @@ class TicketModel {
     }
 
     this.socket.emit('VALIDATE_TICKET', { 
-      codigo: cleanCode, 
+      codigo: String(code).trim(), 
       staffUsername, 
       isRoleAdmin 
     });

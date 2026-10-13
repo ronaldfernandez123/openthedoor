@@ -269,8 +269,9 @@ class TicketController {
         return;
       }
 
-      // Si se selecciona 'zones' o 'mapa-reserva', asegurar que la zona esté visible
+      // Si se selecciona 'zones' o 'mapa-reserva', asegurar que el mapa esté desplegado y la zona visible
       if (sectionId === 'zones' || sectionId === 'mapa-reserva') {
+        this.handleEnsureMapOpen();
         const saharaContent = document.getElementById('zone-content-sahara');
         if (saharaContent && saharaContent.classList.contains('hidden')) {
           this.handleToggleZone('sahara');
@@ -290,6 +291,52 @@ class TicketController {
       setTimeout(performScroll, 70);
     } else {
       performScroll();
+    }
+  }
+
+  // --- CONTROL DEL DESPLEGABLE "MAPA DE ORGANIZACIÓN DE MESAS" ---
+  handleToggleMap() {
+    const mapContent = document.getElementById('mapa-reserva-content');
+    const toggleLabel = document.getElementById('mapa-toggle-label');
+    const toggleBtn = document.getElementById('btn-toggle-mapa');
+    if (!mapContent) return;
+
+    const isClosed = mapContent.classList.contains('hidden');
+    if (isClosed) {
+      this.handleEnsureMapOpen();
+      setTimeout(() => {
+        const target = document.getElementById('mapa-reserva');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
+    } else {
+      mapContent.classList.add('hidden');
+      if (toggleLabel) {
+        toggleLabel.innerHTML = '<span>Desplegar Mapa</span><i id="mapa-toggle-icon" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>';
+      }
+      if (toggleBtn) {
+        toggleBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  }
+
+  handleEnsureMapOpen() {
+    const mapContent = document.getElementById('mapa-reserva-content');
+    const toggleLabel = document.getElementById('mapa-toggle-label');
+    const toggleBtn = document.getElementById('btn-toggle-mapa');
+    if (!mapContent) return;
+
+    if (mapContent.classList.contains('hidden')) {
+      mapContent.classList.remove('hidden');
+      if (toggleLabel) {
+        toggleLabel.innerHTML = '<span>Ocultar Mapa</span><i id="mapa-toggle-icon" class="fa-solid fa-chevron-up text-xs transition-transform duration-300"></i>';
+      }
+      if (toggleBtn) {
+        toggleBtn.setAttribute('aria-expanded', 'true');
+      }
+      // Re-renderizar las mesas para asegurar estado actualizado
+      this.renderTableMap();
     }
   }
 
@@ -320,6 +367,52 @@ class TicketController {
         if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
       }
     });
+  }
+
+  // --- REDIRECCIÓN Y APERTURA DE ZONA DESDE LAS TARJETAS DE PRECIOS (IMAGEN 1) ---
+  handleSelectZoneFromPrices(selectedZone) {
+    const z = (selectedZone || 'sahara').toLowerCase();
+
+    // Si la vista principal de cliente estaba oculta, activarla
+    const clientView = document.getElementById('view-client');
+    if (clientView && clientView.classList.contains('hidden')) {
+      this.handleNavigate('client');
+    }
+
+    // Asegurar que el mapa de organización de mesas esté desplegado
+    this.handleEnsureMapOpen();
+
+    // Asegurarse de abrir la zona seleccionada en el acordeón del mapa
+    const zones = ['sahara', 'oasis', 'nomad'];
+    zones.forEach(zoneKey => {
+      const content = document.getElementById(`zone-content-${zoneKey}`);
+      const header = document.getElementById(`zone-header-${zoneKey}`);
+      const icon = document.getElementById(`zone-icon-${zoneKey}`);
+      if (zoneKey === z) {
+        if (content) content.classList.remove('hidden');
+        if (icon) icon.className = "fa-solid fa-chevron-down text-xs transition-transform";
+        if (header) header.classList.add('bg-amber-50', 'dark:bg-slate-700/80');
+      } else {
+        if (content) content.classList.add('hidden');
+        if (icon) icon.className = "fa-solid fa-chevron-right text-xs transition-transform";
+        if (header) header.classList.remove('bg-amber-50', 'dark:bg-slate-700/80');
+      }
+    });
+
+    // Scroll suave hacia el encabezado de la zona
+    const zoneHeader = document.getElementById(`zone-header-${z}`);
+    if (zoneHeader) {
+      zoneHeader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      this.handleNavToSection('mapa-reserva');
+    }
+
+    const zoneNames = {
+      sahara: 'Zona Sahara (Primera Línea VIP)',
+      oasis: 'Zona Oasis (Área Central Preferencial)',
+      nomad: 'Zona Nomad (Área General & Lounge)'
+    };
+    this.view.showToast(`📍 Mostrando puestos disponibles para ${zoneNames[z] || z}.`, 'info');
   }
 
   // --- INTERACCIÓN CON SILLAS & MESAS (PANTALLA EMERGENTE ADULTO / NIÑO) ---
@@ -451,16 +544,25 @@ class TicketController {
       `;
     }
 
-    // 2. Columnas en la tabla de precios
-    ['PREVENTA', 'ETAPA_2', 'FULL'].forEach(s => {
-      const colTh = document.getElementById(`th-col-${s.toLowerCase()}`);
-      if (colTh) {
-        if (s === stage) {
-          colTh.className = "py-4 px-4 font-black uppercase tracking-wider text-xs bg-amber-500/30 text-amber-300 ring-2 ring-amber-400";
-        } else {
-          colTh.className = "py-4 px-4 font-black uppercase tracking-wider text-xs text-slate-400";
+    // 2. Columna activa resaltada en las 3 tarjetas de precios (Imagen 1)
+    const stageKey = (stage || 'PREVENTA').toLowerCase(); // 'preventa', 'etapa_2', 'full'
+    const stages = ['preventa', 'etapa_2', 'full'];
+    const zones = ['sahara', 'oasis', 'nomad'];
+
+    zones.forEach(zone => {
+      stages.forEach(st => {
+        const topCell = document.getElementById(`price-cell-${zone}-${st}-adult`);
+        const bottomCell = document.getElementById(`price-cell-${zone}-${st}-child`);
+        if (topCell && bottomCell) {
+          if (st === stageKey) {
+            topCell.classList.add('stage-pill-top');
+            bottomCell.classList.add('stage-pill-bottom');
+          } else {
+            topCell.classList.remove('stage-pill-top');
+            bottomCell.classList.remove('stage-pill-bottom');
+          }
         }
-      }
+      });
     });
 
     // 3. Precios en cabeceras de acordeón
@@ -639,7 +741,10 @@ class TicketController {
   handleShareReceipt() {
     if (!this.lastConfirmedPurchase) return;
     const p = this.lastConfirmedPurchase;
-    const text = `🎟️ ¡Mis Boletos para la Gran Gala OpenTheDoor!\nCódigo: ${p.codigoCompra}\nPuestos: ${p.puestos.join(', ')}\nTotal: $${p.total.toLocaleString('es-CO')} COP`;
+    const puestosStr = (Array.isArray(p.puestosDetalles) && p.puestosDetalles.length > 0)
+      ? p.puestosDetalles.map(d => `${d.puesto} (${d.tipo === 'NINO' ? 'Niño' : 'Adulto'})`).join(', ')
+      : (Array.isArray(p.puestos) ? p.puestos.join(', ') : '');
+    const text = `🎟️ ¡Mis Boletos para la Cena San Silvestre 2026 - Hotel Cartagena Plaza!\nCódigo Único: ${p.codigoCompra}\nPuerta: ${p.puertaSugerida || 'Puerta Asignada'}\nPuestos (${p.numEntradas || p.puestos.length}): ${puestosStr}\nTotal: $${p.total.toLocaleString('es-CO')} COP\n(1 Solo Código QR para toda la reserva)`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   }

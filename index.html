@@ -94,8 +94,8 @@
         <!-- Enlaces Rápidos de Navegación -->
         <nav class="hidden lg:flex items-center gap-5 text-xs font-bold text-slate-600 dark:text-slate-300">
           <a href="#hero" onclick="appController.handleNavToSection('hero', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Inicio</a>
-          <a href="#mapa-reserva" onclick="appController.handleNavToSection('mapa-reserva', event)" class="text-amber-600 dark:text-amber-400 font-extrabold flex items-center gap-1">
-            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Plano en Vivo
+          <a href="#mapa-reserva" onclick="appController.handleEnsureMapOpen(); appController.handleNavToSection('mapa-reserva', event)" class="text-amber-600 dark:text-amber-400 font-extrabold flex items-center gap-1">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Mapa de Mesas
           </a>
           <a href="#zones" onclick="appController.handleNavToSection('zones', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Zonas</a>
           <a href="#prices" onclick="appController.handleNavToSection('prices', event)" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">Precios</a>
@@ -165,8 +165,8 @@
       <!-- Barra de Navegación Rápida Móvil / Tablet -->
       <div class="flex lg:hidden items-center gap-4 py-2.5 border-t border-slate-100 dark:border-slate-800 overflow-x-auto no-scrollbar text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">
         <a href="#hero" onclick="appController.handleNavToSection('hero', event)" class="hover:text-amber-600 dark:hover:text-amber-400">Inicio</a>
-        <a href="#mapa-reserva" onclick="appController.handleNavToSection('mapa-reserva', event)" class="text-amber-600 dark:text-amber-400 font-extrabold flex items-center gap-1">
-          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Plano en Vivo
+        <a href="#mapa-reserva" onclick="appController.handleEnsureMapOpen(); appController.handleNavToSection('mapa-reserva', event)" class="text-amber-600 dark:text-amber-400 font-extrabold flex items-center gap-1">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Mapa de Mesas
         </a>
         <a href="#zones" onclick="appController.handleNavToSection('zones', event)" class="hover:text-amber-600 dark:hover:text-amber-400">Zonas</a>
         <a href="#prices" onclick="appController.handleNavToSection('prices', event)" class="hover:text-amber-600 dark:hover:text-amber-400">Precios</a>
@@ -233,8 +233,8 @@
 
         <!-- Botones de Llamada a la Acción -->
         <div class="flex flex-wrap items-center gap-3 pt-2">
-          <a href="#mapa-reserva" class="px-6 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-xl shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
-            <i class="fa-solid fa-chair text-sm"></i> Reservar Puestos en el Mapa
+          <a href="#mapa-reserva" onclick="appController.handleEnsureMapOpen(); appController.handleNavToSection('mapa-reserva', event)" class="px-6 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-xl shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot text-sm"></i> Mapa de Organización de Mesas
           </a>
           <a href="#prices" class="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm rounded-2xl border border-white/20 backdrop-blur-md transition-all flex items-center gap-2">
             <i class="fa-solid fa-tags"></i> Ver Precios & Etapas
@@ -280,23 +280,58 @@
       </p>
     </section>
 
-    <!-- ==================== PLANO INTERACTIVO & RESERVA EN VIVO ==================== -->
-    <section id="mapa-reserva" class="space-y-6 scroll-mt-24">
+    <!-- ==================== MAPA DE ORGANIZACIÓN DE MESAS (DESPLEGABLE) ==================== -->
+    <section id="mapa-reserva" class="space-y-4 scroll-mt-24">
       
-      <div class="text-center space-y-2">
-        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-          <i class="fa-solid fa-satellite-dish mr-1 text-emerald-500"></i> Sistema Interactivo en Vivo
-        </span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black font-serif text-slate-900 dark:text-white">
-          Plano de Mesas & Selección de Puestos
-        </h2>
-        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Haz clic en cualquier silla disponible para elegir si es entrada para <strong class="text-amber-600 dark:text-amber-400">Adulto</strong> o <strong class="text-sky-600 dark:text-sky-400">Niño (4 a 11 años)</strong> con su respectiva tarifa.
-        </p>
+      <!-- Botón / Encabezado Desplegable Principal -->
+      <div class="rounded-3xl border-2 border-amber-400/80 dark:border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-yellow-400/10 to-amber-500/15 dark:from-amber-950/60 dark:via-slate-800 dark:to-amber-950/60 shadow-lg p-2 sm:p-2.5 transition-all hover:border-amber-500 hover:shadow-amber-500/10">
+        <button type="button" 
+                id="btn-toggle-mapa" 
+                onclick="appController.handleToggleMap()" 
+                class="w-full p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left transition-all hover:bg-amber-500/10 dark:hover:bg-amber-500/10 cursor-pointer"
+                aria-expanded="false"
+                aria-controls="mapa-reserva-content">
+          
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-400 text-slate-950 flex items-center justify-center text-xl sm:text-2xl shadow-md shrink-0">
+              <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-sm">
+                  <i class="fa-solid fa-satellite-dish mr-1 text-slate-950"></i> Interactivo en Vivo
+                </span>
+                <span class="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                  ✦ 60 Mesas • 600 Puestos ✦
+                </span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 dark:text-white tracking-tight">
+                Mapa de organización de mesas
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
+                Haz clic aquí para desplegar el plano de la playa, elegir tus puestos (Adulto / Niño) y comprar en línea.
+              </p>
+            </div>
+          </div>
+
+          <!-- Indicador Desplegable a la Derecha -->
+          <div class="flex items-center gap-3 self-end sm:self-center shrink-0">
+            <span id="mapa-toggle-label" class="px-5 py-2.5 rounded-full text-xs font-black bg-slate-950 text-white dark:bg-amber-500 dark:text-slate-950 shadow-md flex items-center gap-2 transition-transform hover:scale-105">
+              <span>Desplegar Mapa</span>
+              <i id="mapa-toggle-icon" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+            </span>
+          </div>
+        </button>
       </div>
 
-      <!-- Layout: Carrito Lateral Izquierdo + Plano Central de la Playa -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- Contenedor Desplegable (Oculto por defecto o visible al pulsar) -->
+      <div id="mapa-reserva-content" class="hidden space-y-6 pt-2">
+        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 text-center max-w-2xl mx-auto">
+          Haz clic en cualquier silla disponible para elegir si es entrada para <strong class="text-amber-600 dark:text-amber-400">Adulto</strong> o <strong class="text-sky-600 dark:text-sky-400">Niño (4 a 11 años)</strong> con su respectiva tarifa.
+        </p>
+
+        <!-- Layout: Carrito Lateral Izquierdo + Plano Central de la Playa -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <!-- Panel Lateral Izquierdo: Selección & Carrito -->
         <div class="lg:col-span-4 bg-white dark:bg-slate-800 rounded-3xl p-5 sm:p-6 border border-amber-200/60 dark:border-slate-700 shadow-sm space-y-4 sticky top-24">
@@ -493,6 +528,9 @@
 
       </div>
 
+      <!-- Fin Contenedor Desplegable Mapa de Mesas -->
+      </div>
+
     </section>
 
     <!-- ==================== TABLA OFICIAL DE PRECIOS Y PLANES (IMAGEN 1) ==================== -->
@@ -507,88 +545,207 @@
         </p>
       </div>
 
-      <!-- Tabla Estructurada Conforme a Imagen 1 -->
-      <div class="overflow-x-auto rounded-3xl border border-amber-200/80 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
-        <table class="w-full text-center border-collapse">
-          <thead>
-            <tr class="border-b border-amber-200 dark:border-slate-700 bg-slate-950 text-white">
-              <th class="py-4 px-4 text-left font-black uppercase tracking-wider text-xs">Zona / Plan</th>
-              <th class="py-4 px-4 font-black uppercase tracking-wider text-xs">Tipo de Entrada</th>
-              <th id="th-col-preventa" class="py-4 px-4 font-black uppercase tracking-wider text-xs bg-amber-500/20 text-amber-300">
-                PREVENTA<br><span class="text-[10px] font-normal text-slate-300">(Hasta el 15 de oct)</span>
-              </th>
-              <th id="th-col-etapa_2" class="py-4 px-4 font-black uppercase tracking-wider text-xs">
-                ETAPA 2<br><span class="text-[10px] font-normal text-slate-400">(16 de oct al 30 de nov)</span>
-              </th>
-              <th id="th-col-full" class="py-4 px-4 font-black uppercase tracking-wider text-xs">
-                PRECIO FULL<br><span class="text-[10px] font-normal text-slate-400">(A partir del 1 de dic)</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-xs sm:text-sm">
-            
-            <!-- SAHARA -->
-            <tr class="bg-amber-50/50 dark:bg-amber-950/20 font-bold">
-              <td rowspan="2" class="py-4 px-4 text-left font-black text-amber-900 dark:text-amber-300 border-r border-amber-200 dark:border-slate-700">
-                <span class="text-base font-serif block">SAHARA</span>
-                <span class="text-[10px] font-bold text-slate-500">Primera Línea frente a Tarima</span>
-              </td>
-              <td class="py-3 px-4 font-black text-slate-900 dark:text-slate-100">ADULTO</td>
-              <td class="py-3 px-4 font-black font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10">$1.050.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.100.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.200.000</td>
-            </tr>
-            <tr class="bg-amber-50/20 dark:bg-amber-950/10">
-              <td class="py-3 px-4 font-bold text-slate-600 dark:text-slate-300">
-                NIÑO <span class="text-[10px] text-slate-500 block sm:inline">(4 a 11 años)</span>
-              </td>
-              <td class="py-3 px-4 font-black font-mono text-amber-700 dark:text-amber-400 bg-amber-500/10">$420.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$490.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$550.000</td>
-            </tr>
+      <!-- Contenedor Oficial de Tarjetas de Precios por Zonas (Diseño Conforme a Imagen 1) -->
+      <div class="space-y-6 max-w-4xl mx-auto">
+        
+        <!-- 1. TARJETA SAHARA -->
+        <div class="price-zone-card card-sahara rounded-3xl p-6 sm:p-8 shadow-lg text-slate-950">
+          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 sm:mb-6 text-slate-950 font-sans">
+            Sahara
+          </h3>
+          <div class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+            <table class="price-table min-w-[500px] w-full text-slate-950 font-sans">
+              <thead>
+                <tr class="border-b border-black/20 text-slate-950">
+                  <th class="py-2.5 px-3 w-[22%]"></th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Preventa</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-slate-900/80">hasta 15 oct</div>
+                  </th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Etapa 2</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-slate-900/80">16 oct al 30 nov</div>
+                  </th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Precio full</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-slate-900/80">desde 1 dic</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Fila Adulto -->
+                <tr class="border-b border-black/20">
+                  <td class="py-3.5 px-3 font-extrabold text-sm sm:text-base">
+                    Adulto
+                  </td>
+                  <td id="price-cell-sahara-preventa-adult" class="py-3.5 px-4 font-black text-sm sm:text-base stage-pill-top">
+                    $1.050.000
+                  </td>
+                  <td id="price-cell-sahara-etapa_2-adult" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $1.100.000
+                  </td>
+                  <td id="price-cell-sahara-full-adult" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $1.200.000
+                  </td>
+                </tr>
+                <!-- Fila Niño -->
+                <tr class="border-b border-black/20">
+                  <td class="py-3.5 px-3">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Niño</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-slate-900/80">4 a 11 años</div>
+                  </td>
+                  <td id="price-cell-sahara-preventa-child" class="py-3.5 px-4 font-black text-sm sm:text-base stage-pill-bottom">
+                    $420.000
+                  </td>
+                  <td id="price-cell-sahara-etapa_2-child" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $490.000
+                  </td>
+                  <td id="price-cell-sahara-full-child" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $550.000
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-6">
+            <button type="button" onclick="appController.handleSelectZoneFromPrices('sahara')" class="bg-black hover:bg-neutral-900 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-7 py-3 rounded-full transition-all shadow-md inline-flex items-center gap-2 cursor-pointer">
+              Reservar zona Sahara
+            </button>
+          </div>
+        </div>
 
-            <!-- OASIS -->
-            <tr class="bg-red-50/40 dark:bg-red-950/20 font-bold">
-              <td rowspan="2" class="py-4 px-4 text-left font-black text-red-900 dark:text-red-300 border-r border-red-200 dark:border-slate-700">
-                <span class="text-base font-serif block">OASIS</span>
-                <span class="text-[10px] font-bold text-slate-500">Área Central Preferencial</span>
-              </td>
-              <td class="py-3 px-4 font-black text-slate-900 dark:text-slate-100">ADULTO</td>
-              <td class="py-3 px-4 font-black font-mono text-red-700 dark:text-red-400 bg-amber-500/10">$950.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.000.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.100.000</td>
-            </tr>
-            <tr class="bg-red-50/20 dark:bg-red-950/10">
-              <td class="py-3 px-4 font-bold text-slate-600 dark:text-slate-300">
-                NIÑO <span class="text-[10px] text-slate-500 block sm:inline">(4 a 11 años)</span>
-              </td>
-              <td class="py-3 px-4 font-black font-mono text-red-700 dark:text-red-400 bg-amber-500/10">$420.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$490.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$550.000</td>
-            </tr>
+        <!-- 2. TARJETA OASIS -->
+        <div class="price-zone-card card-oasis rounded-3xl p-6 sm:p-8 shadow-lg text-white">
+          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 sm:mb-6 text-white font-sans">
+            Oasis
+          </h3>
+          <div class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+            <table class="price-table min-w-[500px] w-full text-white font-sans">
+              <thead>
+                <tr class="border-b border-white/20 text-white">
+                  <th class="py-2.5 px-3 w-[22%]"></th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Preventa</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">hasta 15 oct</div>
+                  </th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Etapa 2</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">16 oct al 30 nov</div>
+                  </th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Precio full</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">desde 1 dic</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Fila Adulto -->
+                <tr class="border-b border-white/20">
+                  <td class="py-3.5 px-3 font-extrabold text-sm sm:text-base text-white">
+                    Adulto
+                  </td>
+                  <td id="price-cell-oasis-preventa-adult" class="py-3.5 px-4 font-black text-sm sm:text-base stage-pill-top">
+                    $950.000
+                  </td>
+                  <td id="price-cell-oasis-etapa_2-adult" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $1.000.000
+                  </td>
+                  <td id="price-cell-oasis-full-adult" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $1.100.000
+                  </td>
+                </tr>
+                <!-- Fila Niño -->
+                <tr class="border-b border-white/20">
+                  <td class="py-3.5 px-3 text-white">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Niño</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">4 a 11 años</div>
+                  </td>
+                  <td id="price-cell-oasis-preventa-child" class="py-3.5 px-4 font-black text-sm sm:text-base stage-pill-bottom">
+                    $420.000
+                  </td>
+                  <td id="price-cell-oasis-etapa_2-child" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $490.000
+                  </td>
+                  <td id="price-cell-oasis-full-child" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $550.000
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-6">
+            <button type="button" onclick="appController.handleSelectZoneFromPrices('oasis')" class="bg-black hover:bg-neutral-900 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-7 py-3 rounded-full transition-all shadow-md inline-flex items-center gap-2 border border-white/10 cursor-pointer">
+              Reservar zona Oasis
+            </button>
+          </div>
+        </div>
 
-            <!-- NOMAD -->
-            <tr class="bg-amber-900/5 dark:bg-amber-900/20 font-bold">
-              <td rowspan="2" class="py-4 px-4 text-left font-black text-amber-950 dark:text-amber-200 border-r border-amber-900/20 dark:border-slate-700">
-                <span class="text-base font-serif block">NOMAD</span>
-                <span class="text-[10px] font-bold text-slate-500">Área General & Lounge</span>
-              </td>
-              <td class="py-3 px-4 font-black text-slate-900 dark:text-slate-100">ADULTO</td>
-              <td class="py-3 px-4 font-black font-mono text-amber-800 dark:text-amber-300 bg-amber-500/10">$850.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$900.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$1.000.000</td>
-            </tr>
-            <tr class="bg-amber-900/5 dark:bg-amber-900/10">
-              <td class="py-3 px-4 font-bold text-slate-600 dark:text-slate-300">
-                NIÑO <span class="text-[10px] text-slate-500 block sm:inline">(4 a 11 años)</span>
-              </td>
-              <td class="py-3 px-4 font-black font-mono text-amber-800 dark:text-amber-300 bg-amber-500/10">$420.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$490.000</td>
-              <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">$550.000</td>
-            </tr>
+        <!-- 3. TARJETA NOMAD -->
+        <div class="price-zone-card card-nomad rounded-3xl p-6 sm:p-8 shadow-lg text-white">
+          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 sm:mb-6 text-white font-sans">
+            Nomad
+          </h3>
+          <div class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+            <table class="price-table min-w-[500px] w-full text-white font-sans">
+              <thead>
+                <tr class="border-b border-white/20 text-white">
+                  <th class="py-2.5 px-3 w-[22%]"></th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Preventa</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">hasta 15 oct</div>
+                  </th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Etapa 2</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">16 oct al 30 nov</div>
+                  </th>
+                  <th class="py-2.5 px-4 w-[26%] align-bottom">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Precio full</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">desde 1 dic</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Fila Adulto -->
+                <tr class="border-b border-white/20">
+                  <td class="py-3.5 px-3 font-extrabold text-sm sm:text-base text-white">
+                    Adulto
+                  </td>
+                  <td id="price-cell-nomad-preventa-adult" class="py-3.5 px-4 font-black text-sm sm:text-base stage-pill-top">
+                    $850.000
+                  </td>
+                  <td id="price-cell-nomad-etapa_2-adult" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $900.000
+                  </td>
+                  <td id="price-cell-nomad-full-adult" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $1.000.000
+                  </td>
+                </tr>
+                <!-- Fila Niño -->
+                <tr class="border-b border-white/20">
+                  <td class="py-3.5 px-3 text-white">
+                    <div class="font-extrabold text-sm sm:text-base leading-tight">Niño</div>
+                    <div class="text-[11px] sm:text-xs font-normal text-white/80">4 a 11 años</div>
+                  </td>
+                  <td id="price-cell-nomad-preventa-child" class="py-3.5 px-4 font-black text-sm sm:text-base stage-pill-bottom">
+                    $420.000
+                  </td>
+                  <td id="price-cell-nomad-etapa_2-child" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $490.000
+                  </td>
+                  <td id="price-cell-nomad-full-child" class="py-3.5 px-4 font-black text-sm sm:text-base">
+                    $550.000
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-6">
+            <button type="button" onclick="appController.handleSelectZoneFromPrices('nomad')" class="bg-black hover:bg-neutral-900 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-7 py-3 rounded-full transition-all shadow-md inline-flex items-center gap-2 cursor-pointer">
+              Reservar zona Nomad
+            </button>
+          </div>
+        </div>
 
-          </tbody>
-        </table>
       </div>
 
       <!-- Notas Aclaratorias sobre Edades -->
@@ -1256,7 +1413,12 @@
         </div>
 
         <div class="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-amber-200 dark:border-slate-700 space-y-1">
-          <strong class="text-slate-400 block text-[9px] uppercase">Puestos Asignados & Tipo:</strong>
+          <div class="flex items-center justify-between">
+            <strong class="text-slate-400 block text-[9px] uppercase">Puestos Asignados & Tipo:</strong>
+            <span id="lbl-total-entradas-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+              1 Entrada
+            </span>
+          </div>
           <div id="lbl-puestos-detalles" class="font-extrabold text-slate-900 dark:text-slate-100 text-xs leading-relaxed"></div>
           <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700 text-xs">
             <span class="font-bold">Total Pagado:</span>
@@ -1264,10 +1426,16 @@
           </div>
         </div>
 
-        <!-- Código QR Canvas -->
-        <div class="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-800 rounded-xl border border-amber-200 dark:border-slate-700">
-          <div id="qr-canvas-wrapper" class="p-2 bg-white rounded-lg shadow-sm"></div>
-          <span class="text-[9px] text-slate-400 font-mono mt-1">CÓDIGO DE VALIDACIÓN ANTI-FRAUDE EN PUERTA</span>
+        <!-- Código QR Canvas (1 Solo QR Oficial para toda la compra) -->
+        <div class="flex flex-col items-center justify-center p-3.5 bg-white dark:bg-slate-800 rounded-xl border border-amber-200 dark:border-slate-700 space-y-1.5">
+          <div class="inline-flex items-center gap-1.5 text-[10px] font-black text-amber-900 dark:text-amber-200 bg-amber-100 dark:bg-amber-950/70 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-800 shadow-sm">
+            <i class="fa-solid fa-qrcode text-amber-600 dark:text-amber-400"></i>
+            <span>1 SOLO CÓDIGO QR PARA TODA LA COMPRA</span>
+          </div>
+          <div id="qr-canvas-wrapper" class="p-2 bg-white rounded-xl shadow-sm"></div>
+          <span class="text-[9px] text-slate-400 font-mono mt-1 text-center">
+            PASE UNIFICADO OFICIAL • VÁLIDO PARA EL INGRESO DE TODOS LOS PUESTOS
+          </span>
         </div>
       </div>
 

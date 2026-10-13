@@ -9,11 +9,58 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const { Server } = require('socket.io');
 const { Pool } = require('pg');
 
 const app = express();
 const server = http.createServer(app);
+
+// --- CRIPTOGRAFÍA & FIRMAS DIGITALES ANTI-FALSIFICACIÓN (HMAC-SHA256) ---
+const QR_SECRET_KEY = process.env.QR_SECRET_KEY || 'EM_HOTELS_CARTAGENA_PLAZA_KEY_2026';
+
+function signTicketCode(code) {
+  if (!code) return '';
+  const clean = String(code).trim();
+  const sig = crypto.createHmac('sha256', QR_SECRET_KEY).update(clean).digest('hex').slice(0, 12);
+  return `${clean}.s.${sig}`;
+}
+
+function verifyTicketCode(rawInput) {
+  if (!rawInput) return { isValid: false, code: '', isSigned: false };
+  const clean = String(rawInput).trim();
+  if (clean.includes('.s.')) {
+    const parts = clean.split('.s.');
+    const code = parts[0];
+    const sig = parts[1];
+    const expected = crypto.createHmac('sha256', QR_SECRET_KEY).update(code).digest('hex').slice(0, 12);
+    return { isValid: (sig === expected), code, isSigned: true };
+  }
+  // Si ingresó el código alfanumérico manualmente sin firma
+  return { isValid: true, code: clean, isSigned: false };
+}
+
+// Control de intentos fallidos por socket (Protección contra fuerza bruta en tiempo real)
+const socketAuthFailures = {};
+function checkSocketAuthRateLimit(socketId) {
+  const now = Date.now();
+  const rec = socketAuthFailures[socketId];
+  if (!rec) return false;
+  if (now - rec.firstAttempt > 60000) {
+    delete socketAuthFailures[socketId];
+    return false;
+  }
+  return rec.count >= 5;
+}
+function recordSocketAuthFailure(socketId) {
+  const now = Date.now();
+  if (!socketAuthFailures[socketId] || now - socketAuthFailures[socketId].firstAttempt > 60000) {
+    socketAuthFailures[socketId] = { count: 1, firstAttempt: now };
+  } else {
+    socketAuthFailures[socketId].count++;
+  }
+}
 
 // Connection String de PostgreSQL
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:DqNiRwlZxgkHwHKSNCKlnoPGqGOcmhVY@tokaido.proxy.rlwy.net:44633/railway';
@@ -264,6 +311,32 @@ function isAdmin(socket) {
   return socket.data.admin === true;
 }
 
+// --- MIDDLEWARES DE SEGURIDAD (HELMET & RATE LIMITING) ---
+app.use(helmet({
+  contentSecurityPolicy: false, // Permite CDNs externos de Tailwind, FontAwesome, QRCode.js y Html5Qrcode
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  frameguard: { action: 'sameorigin' } // Evita Clickjacking
+}));
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 300, // 300 solicitudes por IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes desde esta IP. Intente de nuevo en 15 minutos.' }
+});
+app.use('/api/', generalLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minuto
+  max: 5, // Máximo 5 intentos por minuto (Protección contra fuerza bruta)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos fallidos. Por seguridad, espere 1 minuto.' }
+});
+app.use('/api/auth', authLimiter);
+
 // --- MIDDLEWARES ---
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '20mb' }));
@@ -425,9 +498,13 @@ io.on('connection', (socket) => {
     const primaryZone = seatZones[0] || 'NOMAD';
     const doorInfo = getZoneDoorInfo(primaryZone);
 
+    const codigoCompra = datosCompra.codigoCompra || `OPN-${Math.floor(100000 + Math.random() * 900000)}`;
+    const qrToken = signTicketCode(codigoCompra);
+
     const nuevaVenta = {
       idPedido: datosCompra.idPedido || `ORD-${Date.now().toString().slice(-6)}`,
-      codigoCompra: datosCompra.codigoCompra || `OPN-${Math.floor(100000 + Math.random() * 900000)}`,
+      codigoCompra,
+      qrToken,
       cliente: datosCompra.cliente || "Cliente Oficial",
       email: datosCompra.email ? String(datosCompra.email).toLowerCase() : null,
       telefono: datosCompra.telefono || "",
@@ -494,8 +571,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on('ADMIN_LOGIN', ({ username, password }) => {
+    if (checkSocketAuthRateLimit(socket.id)) {
+      socket.emit('ADMIN_AUTH_FAILED', { message: 'Demasiados intentos fallidos (Límite: 5 por minuto). Espera 1 minuto por seguridad.' });
+      return;
+    }
+
     const foundAdmin = ADMIN_USERS.find(a => a.username === username && a.password === password);
     if (!foundAdmin) {
+      recordSocketAuthFailure(socket.id);
       socket.emit('ADMIN_AUTH_FAILED', { message: 'Credenciales incorrectas.' });
       return;
     }
@@ -541,10 +624,16 @@ io.on('connection', (socket) => {
   });
 
   socket.on('STAFF_LOGIN', ({ username, password }) => {
+    if (checkSocketAuthRateLimit(socket.id)) {
+      socket.emit('STAFF_AUTH_FAILED', { message: 'Demasiados intentos fallidos (Límite: 5 por minuto). Espera 1 minuto por seguridad.' });
+      return;
+    }
+
     const foundStaff = staffUsers.find(s => s.username === username && s.password === password);
     if (foundStaff) {
       socket.emit('STAFF_AUTH_SUCCESS', foundStaff);
     } else {
+      recordSocketAuthFailure(socket.id);
       socket.emit('STAFF_AUTH_FAILED', { message: 'Credenciales de Staff incorrectas.' });
     }
   });
@@ -645,14 +734,26 @@ io.on('connection', (socket) => {
   });
 
   socket.on('VALIDATE_TICKET', async ({ codigo, staffUsername, isRoleAdmin }) => {
-    const cleanCode = (codigo || '').trim();
+    const verification = verifyTicketCode(codigo);
+    if (!verification.isValid) {
+      socket.emit('VALIDATION_RESULT', {
+        status: 'INVALID',
+        isCryptographicallySigned: false,
+        message: '🚫 ¡ALERTA DE SEGURIDAD: CÓDIGO QR NO AUTORIZADO!',
+        detail: 'La firma criptográfica digital HMAC no coincide con la llave oficial del Hotel Cartagena Plaza.\n⚠️ Posible intento de falsificación o código QR alterado.'
+      });
+      return;
+    }
+
+    const cleanCode = verification.code;
     const venta = salesHistory.find(v => v.codigoCompra === cleanCode || v.idPedido === cleanCode);
 
     if (!venta) {
       socket.emit('VALIDATION_RESULT', {
         status: 'INVALID',
+        isCryptographicallySigned: verification.isSigned,
         message: '❌ CÓDIGO NO ENCONTRADO',
-        detail: `El código "${cleanCode}" no existe o es inválido.`
+        detail: `El código "${cleanCode}" no existe en la base de datos oficial del evento.`
       });
       return;
     }
@@ -714,8 +815,9 @@ io.on('connection', (socket) => {
 
       socket.emit('VALIDATION_RESULT', {
         status: 'VALID',
+        isCryptographicallySigned: verification.isSigned,
         message: '✅ ENTRADA VÁLIDA - ¡ACCESO PERMITIDO!',
-        detail: `Cliente: ${venta.cliente} | Puestos: ${venta.puestos.join(', ')} | ${zonaNombre} (${correctDoor})`,
+        detail: `Cliente: ${venta.cliente} | Puestos (${venta.numEntradas || venta.puestos.length}): ${venta.puestos.join(', ')} | ${zonaNombre} (${correctDoor})${verification.isSigned ? '\n🛡️ Firma Criptográfica Oficial Verificada (HMAC-SHA256)' : ''}`,
         venta
       });
       broadcastAdminData();

@@ -355,6 +355,12 @@ class TicketView {
     document.getElementById('lbl-nombre-cliente').textContent = venta.cliente;
     document.getElementById('lbl-fecha-hora').textContent = venta.fechaHora;
     document.getElementById('lbl-codigo-compra').textContent = venta.codigoCompra;
+    const numPuestos = Array.isArray(venta.puestos) ? venta.puestos.length : (venta.numEntradas || 1);
+    const badgeEl = document.getElementById('lbl-total-entradas-badge');
+    if (badgeEl) {
+      badgeEl.textContent = `${numPuestos} ${numPuestos === 1 ? 'Puesto' : 'Puestos (Pase Unificado)'}`;
+    }
+
     const puestosTexto = (Array.isArray(venta.puestosDetalles) && venta.puestosDetalles.length > 0)
       ? venta.puestosDetalles.map(d => `${d.puesto} (${d.tipo === 'NINO' ? 'Niño' : 'Adulto'})`).join(', ')
       : (Array.isArray(venta.puestos) ? venta.puestos.join(', ') : '');
@@ -375,32 +381,47 @@ class TicketView {
     const qrContainer = document.getElementById('qr-canvas-wrapper');
     if (qrContainer) {
       qrContainer.innerHTML = '';
-      const qrPayload = venta.codigoCompra || venta.idPedido || 'OPN-TICKET';
 
-      try {
-        if (typeof QRCode === 'function') {
-          new QRCode(qrContainer, {
-            text: qrPayload,
-            width: 170,
-            height: 170,
-            colorDark: "#0f172a",
-            colorLight: "#ffffff",
-            correctLevel: (QRCode.CorrectLevel && QRCode.CorrectLevel.H) ? QRCode.CorrectLevel.H : 2
-          });
-        } else {
+      const drawQr = (payload) => {
+        qrContainer.innerHTML = '';
+        try {
+          if (typeof QRCode === 'function') {
+            new QRCode(qrContainer, {
+              text: payload,
+              width: 170,
+              height: 170,
+              colorDark: "#0f172a",
+              colorLight: "#ffffff",
+              correctLevel: (QRCode.CorrectLevel && QRCode.CorrectLevel.H) ? QRCode.CorrectLevel.H : 2
+            });
+          } else {
+            const img = document.createElement('img');
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
+            img.className = 'w-44 h-44 mx-auto object-contain block rounded-lg shadow-sm';
+            img.alt = `Código QR ${payload}`;
+            qrContainer.appendChild(img);
+          }
+        } catch (e) {
+          console.warn('Error inicializando QRCode.js, usando respaldo de imagen:', e);
           const img = document.createElement('img');
-          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrPayload)}`;
+          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
           img.className = 'w-44 h-44 mx-auto object-contain block rounded-lg shadow-sm';
-          img.alt = `Código QR ${qrPayload}`;
+          img.alt = `Código QR ${payload}`;
           qrContainer.appendChild(img);
         }
-      } catch (e) {
-        console.warn('Error inicializando QRCode.js, usando respaldo de imagen:', e);
-        const img = document.createElement('img');
-        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrPayload)}`;
-        img.className = 'w-44 h-44 mx-auto object-contain block rounded-lg shadow-sm';
-        img.alt = `Código QR ${qrPayload}`;
-        qrContainer.appendChild(img);
+      };
+
+      if (venta.qrToken && venta.qrToken.includes('.s.')) {
+        drawQr(venta.qrToken);
+      } else if (typeof generateSignedQrToken === 'function') {
+        generateSignedQrToken(venta.codigoCompra || venta.idPedido).then(signedToken => {
+          venta.qrToken = signedToken;
+          drawQr(signedToken);
+        }).catch(() => {
+          drawQr(venta.codigoCompra || venta.idPedido || 'OPN-TICKET');
+        });
+      } else {
+        drawQr(venta.codigoCompra || venta.idPedido || 'OPN-TICKET');
       }
     }
 
@@ -669,6 +690,16 @@ class TicketView {
       INVALID: "fa-circle-xmark text-rose-500 text-3xl"
     };
 
+    let securityBadgeHtml = '';
+    if (result.isCryptographicallySigned) {
+      securityBadgeHtml = `
+        <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 text-xs font-black shadow-xs">
+          <i class="fa-solid fa-shield-halved text-emerald-600 dark:text-emerald-400"></i>
+          <span>🛡️ Firma Criptográfica Verificada (HMAC-SHA256)</span>
+        </div>
+      `;
+    }
+
     let guidanceHtml = '';
     if (status === 'WRONG_DOOR') {
       guidanceHtml = `
@@ -692,6 +723,7 @@ class TicketView {
         <i class="fa-solid ${icons[status] || icons.INVALID} shrink-0 mt-0.5"></i>
         <div class="flex-1 space-y-1">
           <h4 class="font-black text-base">${result.message || 'Resultado de la Validación'}</h4>
+          ${securityBadgeHtml}
           <p class="text-xs opacity-90 whitespace-pre-line leading-relaxed font-medium">${result.detail || ''}</p>
           ${guidanceHtml}
         </div>

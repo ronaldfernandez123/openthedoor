@@ -244,3 +244,60 @@
   min-height: 320px !important;
   width: 100% !important;
 }
+
+/* --- TARJETAS DE PRECIOS POR ZONAS (IMAGEN 1) --- */
+.price-zone-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.price-zone-card.card-sahara {
+  background-color: #d99f2b;
+}
+
+.price-zone-card.card-oasis {
+  background-color: #721e13;
+}
+
+.price-zone-card.card-nomad {
+  background-color: #a47b22;
+}
+
+.price-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+
+.card-sahara .stage-pill-top {
+  background: rgba(255, 255, 255, 0.22);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.card-sahara .stage-pill-bottom {
+  background: rgba(255, 255, 255, 0.22);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.card-oasis .stage-pill-top {
+  background: rgba(255, 255, 255, 0.14);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.card-oasis .stage-pill-bottom {
+  background: rgba(255, 255, 255, 0.14);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.card-nomad .stage-pill-top {
+  background: rgba(255, 255, 255, 0.16);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.card-nomad .stage-pill-bottom {
+  background: rgba(255, 255, 255, 0.16);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
