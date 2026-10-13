@@ -2,7 +2,7 @@
 <html lang="es" class="h-full bg-slate-50">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Cena San Silvestre 2026 | Hotel Cartagena Plaza</title>
   
   <!-- SEO & Meta Tags -->
@@ -416,7 +416,7 @@
                   </span>
                 </div>
               </button>
-              <div id="zone-content-sahara" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-amber-200 dark:border-amber-900/40">
+              <div id="zone-content-sahara" class="hidden p-3.5 sm:p-6 bg-white dark:bg-slate-800 border-t border-amber-200 dark:border-amber-900/40">
                 <div class="tables-grid" id="tables-zone-sahara"></div>
               </div>
             </div>
@@ -448,7 +448,7 @@
                   </span>
                 </div>
               </button>
-              <div id="zone-content-oasis" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-red-200 dark:border-red-900/40">
+              <div id="zone-content-oasis" class="hidden p-3.5 sm:p-6 bg-white dark:bg-slate-800 border-t border-red-200 dark:border-red-900/40">
                 <div class="tables-grid" id="tables-zone-oasis"></div>
               </div>
             </div>
@@ -480,7 +480,7 @@
                   </span>
                 </div>
               </button>
-              <div id="zone-content-nomad" class="hidden p-6 bg-white dark:bg-slate-800 border-t border-amber-900/30">
+              <div id="zone-content-nomad" class="hidden p-3.5 sm:p-6 bg-white dark:bg-slate-800 border-t border-amber-900/30">
                 <div class="tables-grid" id="tables-zone-nomad"></div>
               </div>
             </div>
@@ -518,10 +518,11 @@
       <div class="space-y-6 max-w-4xl mx-auto">
         
         <!-- 1. TARJETA SAHARA -->
-        <div class="price-zone-card card-sahara rounded-3xl p-6 sm:p-8 shadow-lg text-slate-950">
-          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 sm:mb-6 text-slate-950 font-sans">
+        <div class="price-zone-card card-sahara rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-lg text-slate-950">
+          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-4 sm:mb-6 text-slate-950 font-sans">
             Sahara
           </h3>
+          <div class="block sm:hidden text-[10px] text-right font-bold opacity-80 mb-2"><i class="fa-solid fa-arrows-left-right text-[9px] mr-1"></i>Desliza para ver etapas</div>
           <div class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
             <table class="price-table min-w-[500px] w-full text-slate-950 font-sans">
               <thead>
@@ -584,10 +585,11 @@
         </div>
 
         <!-- 2. TARJETA OASIS -->
-        <div class="price-zone-card card-oasis rounded-3xl p-6 sm:p-8 shadow-lg text-white">
-          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 sm:mb-6 text-white font-sans">
+        <div class="price-zone-card card-oasis rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-lg text-white">
+          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-4 sm:mb-6 text-white font-sans">
             Oasis
           </h3>
+          <div class="block sm:hidden text-[10px] text-right font-bold opacity-80 mb-2"><i class="fa-solid fa-arrows-left-right text-[9px] mr-1"></i>Desliza para ver etapas</div>
           <div class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
             <table class="price-table min-w-[500px] w-full text-white font-sans">
               <thead>
@@ -650,10 +652,11 @@
         </div>
 
         <!-- 3. TARJETA NOMAD -->
-        <div class="price-zone-card card-nomad rounded-3xl p-6 sm:p-8 shadow-lg text-white">
-          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-5 sm:mb-6 text-white font-sans">
+        <div class="price-zone-card card-nomad rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-lg text-white">
+          <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-4 sm:mb-6 text-white font-sans">
             Nomad
           </h3>
+          <div class="block sm:hidden text-[10px] text-right font-bold opacity-80 mb-2"><i class="fa-solid fa-arrows-left-right text-[9px] mr-1"></i>Desliza para ver etapas</div>
           <div class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
             <table class="price-table min-w-[500px] w-full text-white font-sans">
               <thead>
@@ -863,11 +866,33 @@
       </div>
     </section>
 
+    <!-- Barra Flotante de Compra Rápida para Móviles / Tablets (lg:hidden) -->
+    <div id="mobile-cart-bar" class="hidden fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-slate-900/95 backdrop-blur-md border-t border-amber-500/30 px-4 py-3 shadow-[0_-10px_25px_rgba(0,0,0,0.5)] transition-all duration-300">
+      <div class="max-w-md mx-auto flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
+            <i class="fa-solid fa-cart-shopping"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span id="mobile-cart-count" class="font-extrabold text-xs text-white">0 puestos</span>
+              <span class="text-[10px] text-amber-400 font-semibold">• Seleccionados</span>
+            </div>
+            <div id="mobile-cart-total" class="font-mono font-black text-amber-400 text-sm leading-tight">$0 COP</div>
+          </div>
+        </div>
+        <button type="button" onclick="appController.handleOpenCheckoutModal()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 rounded-xl font-black text-xs shadow-md shadow-amber-500/20 active:scale-95 transition-all flex items-center gap-2">
+          <span>Comprar</span>
+          <i class="fa-solid fa-arrow-right text-[11px]"></i>
+        </button>
+      </div>
+    </div>
+
   </main>
 
   <!-- ==================== VISTA 2: MIS BOLETAS COMPRADAS ==================== -->
   <main id="view-my-tickets" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
       <div>
         <h2 class="text-2xl font-black text-slate-900 dark:text-white font-serif">Mis Boletas Compradas</h2>
         <p class="text-xs text-slate-500 dark:text-slate-400">Consulta tus comprobantes digitales y códigos QR oficiales para el ingreso al evento.</p>
@@ -1194,7 +1219,7 @@
 
   <!-- ==================== PANTALLA EMERGENTE (MODAL) PARA ELEGIR ADULTO O NIÑO ==================== -->
   <div id="seat-type-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 border-2 border-amber-400/60 dark:border-amber-500/40 shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-4 sm:p-6 space-y-4 sm:space-y-5 border-2 border-amber-400/60 dark:border-amber-500/40 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto">
       
       <!-- Encabezado del Modal -->
       <div class="flex items-start justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
@@ -1284,7 +1309,7 @@
 
   <!-- ==================== MODAL DE CHECKOUT & PAGO ==================== -->
   <div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 border border-slate-200 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-4 sm:p-6 space-y-4 sm:space-y-5 border border-slate-200 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto">
       
       <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
         <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 font-serif">
@@ -1347,7 +1372,7 @@
 
   <!-- ==================== MODAL DE COMPROBANTE OFICIAL & QR ==================== -->
   <div id="ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 border border-amber-300 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-4 sm:p-6 space-y-4 sm:space-y-6 border border-amber-300 dark:border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto">
       
       <!-- Área Imprimible del Boleto Oficial -->
       <div id="ticket-print-area" class="space-y-4 p-5 bg-amber-50/40 dark:bg-slate-900/60 rounded-2xl border border-amber-200 dark:border-slate-700 text-xs">
@@ -1409,7 +1434,7 @@
       </div>
 
       <!-- Acciones del Comprobante -->
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <button onclick="appController.handleDownloadPdf()" class="py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
           <i class="fa-solid fa-file-pdf"></i> Guardar PDF
         </button>
@@ -1426,7 +1451,7 @@
 
   <!-- ==================== MODAL DE AUTENTICACIÓN CLIENTE ==================== -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-4 sm:p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[92vh] overflow-y-auto">
       
       <!-- Encabezado Informativo de Acceso -->
       <div class="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-3">
@@ -1505,7 +1530,7 @@
 
   <!-- ==================== MODAL PORTAL ADMIN & STAFF ==================== -->
   <div id="portal-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-4 sm:p-6 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[92vh] overflow-y-auto">
       
       <div class="flex border-b border-slate-200 dark:border-slate-700 pb-1">
         <button id="tab-portal-admin-btn" onclick="appController.handleSwitchPortalTab('admin')" class="flex-1 py-2 text-xs font-bold text-amber-600 border-b-2 border-amber-600">
@@ -1543,7 +1568,7 @@
   </div>
 
   <!-- Contenedor de Notificaciones Toast -->
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+  <div id="toastContainer" class="fixed bottom-5 right-4 left-4 sm:left-auto sm:right-5 z-50 flex flex-col gap-2 sm:max-w-sm pointer-events-none"></div>
 
   <!-- ==================== FOOTER OFICIAL ==================== -->
   <footer class="bg-slate-950 text-white border-t border-amber-500/20 py-10 mt-12">

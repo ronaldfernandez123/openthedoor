@@ -197,12 +197,16 @@ class TicketView {
     const timerEl = document.getElementById('timer-display');
     const btnCheckout = document.getElementById('btn-checkout');
     const countBadge = document.getElementById('selected-count-badge');
+    const mobileCartBar = document.getElementById('mobile-cart-bar');
+    const mobileCartCount = document.getElementById('mobile-cart-count');
+    const mobileCartTotal = document.getElementById('mobile-cart-total');
 
     if (!listContainer || !totalEl || !btnCheckout) return;
 
     if (countBadge) countBadge.textContent = mySelectedSeats.length;
 
     if (mySelectedSeats.length === 0) {
+      if (mobileCartBar) mobileCartBar.classList.add('hidden');
       listContainer.innerHTML = `
         <div class="p-6 text-center text-slate-400 dark:text-slate-500 space-y-2">
           <i class="fa-solid fa-chair text-3xl opacity-40"></i>
@@ -276,6 +280,16 @@ class TicketView {
     html += '</div>';
     listContainer.innerHTML = html;
     totalEl.textContent = `$${total.toLocaleString('es-CO')} COP`;
+
+    if (mobileCartBar) {
+      mobileCartBar.classList.remove('hidden');
+      if (mobileCartCount) {
+        mobileCartCount.textContent = `${mySelectedSeats.length} ${mySelectedSeats.length === 1 ? 'puesto' : 'puestos'}`;
+      }
+      if (mobileCartTotal) {
+        mobileCartTotal.textContent = `$${total.toLocaleString('es-CO')} COP`;
+      }
+    }
   }
 
   updateTimerDisplay(remainingSeconds, hasSeats = false) {
@@ -285,12 +299,16 @@ class TicketView {
     if (!hasSeats || remainingSeconds === null || remainingSeconds === undefined) {
       timerEl.textContent = "⏱️ Tiempo de Reserva: 05:00";
       timerEl.className = "timer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 p-2.5 rounded-xl text-xs font-bold text-center border border-slate-200 dark:border-slate-700";
+      const mobileCartBar = document.getElementById('mobile-cart-bar');
+      if (mobileCartBar) mobileCartBar.classList.add('hidden');
       return;
     }
 
     if (remainingSeconds <= 0) {
       timerEl.textContent = "⚠️ Reserva Expirada";
       timerEl.className = "timer bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 p-2.5 rounded-xl text-xs font-black text-center border border-rose-300 dark:border-rose-800 animate-pulse";
+      const mobileCartBar = document.getElementById('mobile-cart-bar');
+      if (mobileCartBar) mobileCartBar.classList.add('hidden');
       return;
     }
 

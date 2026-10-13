@@ -2,13 +2,59 @@
    OpenTheDoor - Estilos Personalizados, Mesas Circulares & Impresión
    ========================================================================== */
 
-/* --- MESAS CIRCULARES Y ASIENTOS INTERACTIVOS --- */
+/* --- RESPONSIVIDAD GLOBAL Y OPTIMIZACIÓN MÓVIL --- */
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Ocultar barras de scroll nativas manteniendo scroll táctil suave */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Optimización de toques e interacción en pantallas táctiles */
+button, a, input, select, .seat, .table-card, .btn-buy-table {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --- MESAS CIRCULARES Y ASIENTOS INTERACTIVOS RESPONSIVOS --- */
 .tables-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 28px;
+  gap: 24px;
   justify-items: center;
   align-items: center;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .tables-grid {
+    grid-template-columns: repeat(auto-fill, minmax(102px, 1fr));
+    gap: 16px;
+    padding: 2px;
+  }
+}
+
+@media (max-width: 360px) {
+  .tables-grid {
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 12px;
+  }
 }
 
 .table-card {
@@ -21,9 +67,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 10px auto;
+  margin: 8px auto;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
+}
+
+@media (max-width: 640px) {
+  .table-card {
+    margin: 4px auto;
+  }
 }
 
 .dark .table-card {
@@ -85,6 +137,18 @@
   z-index: 10;
   border: 1.5px solid white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Área táctil ampliada para móviles (34px de toque sin alterar tamaño visual de 18px) */
+.seat::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 50%;
+  z-index: 12;
 }
 
 .dark .seat {
@@ -179,16 +243,16 @@
   animation: scan-laser 2.2s ease-in-out infinite;
 }
 
-/* --- ESTILOS DEL CÓDIGO QR EN COMPROBANTE --- */
+/* --- ESTILOS DEL CÓDIGO QR EN COMPROBANTE RESPONSIVO --- */
 #qr-canvas-wrapper {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 210px !important;
-  height: 210px !important;
+  width: 100% !important;
   max-width: 210px !important;
-  max-height: 210px !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
   margin: 0 auto !important;
   padding: 8px !important;
   background-color: #ffffff !important;
@@ -200,10 +264,9 @@
 #qr-canvas-wrapper img,
 #qr-canvas-wrapper canvas {
   display: block !important;
-  width: 190px !important;
-  height: 190px !important;
+  width: 100% !important;
   max-width: 190px !important;
-  max-height: 190px !important;
+  height: auto !important;
   aspect-ratio: 1 / 1 !important;
   margin: 0 auto !important;
   border-radius: 6px !important;
@@ -315,4 +378,36 @@
   background: rgba(255, 255, 255, 0.16);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+}
+
+/* --- REGLAS RESPONSIVAS ESPECÍFICAS PARA MÓVILES (SMARTPHONES & TABLETS) --- */
+
+/* Prevenir zoom no deseado en iOS Safari al enfocar campos de texto */
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Ajustes de scroll suave en tablas de precios */
+.price-table-wrapper {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Barra flotante de compra rápida para móviles */
+#mobile-cart-bar {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.15), 0 -8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Soporte para notch y safe areas en iPhone */
+@supports (padding: env(safe-area-inset-bottom)) {
+  footer {
+    padding-bottom: calc(2.5rem + env(safe-area-inset-bottom));
+  }
 }

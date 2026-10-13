@@ -216,6 +216,16 @@ class TicketController {
       }
     }
 
+    // Controlar visibilidad de la barra flotante de carrito en móviles
+    const mobileCartBar = document.getElementById('mobile-cart-bar');
+    if (mobileCartBar) {
+      if (viewName !== 'client' || !this.model.mySelectedSeats || this.model.mySelectedSeats.length === 0) {
+        mobileCartBar.classList.add('hidden');
+      } else if (this.model.mySelectedSeats.length > 0) {
+        mobileCartBar.classList.remove('hidden');
+      }
+    }
+
     if (viewName === 'my-tickets') {
       if (!this.model.currentUser) {
         this.handleOpenAuthModal('login');
@@ -653,6 +663,8 @@ class TicketController {
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    const mobileCartBar = document.getElementById('mobile-cart-bar');
+    if (mobileCartBar) mobileCartBar.classList.add('hidden');
   }
 
   handleCloseCheckoutModal() {
@@ -660,6 +672,10 @@ class TicketController {
     if (modal) {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+    const mobileCartBar = document.getElementById('mobile-cart-bar');
+    if (mobileCartBar && this.model.mySelectedSeats && this.model.mySelectedSeats.length > 0) {
+      mobileCartBar.classList.remove('hidden');
     }
   }
 
