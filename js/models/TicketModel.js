@@ -595,18 +595,19 @@ class TicketModel {
   // --- ADMIN ACCIONES ---
   adminLogin(username, password) {
     if (!this.socket || !this.socket.connected) {
-      if (username === 'admin' && (password === 'admin123password' || password === 'admin')) {
+      if ((username === 'admin' && (password === 'admin123password' || password === 'admin')) ||
+          (username === 'admindos' && password === 'emhotelsadmin31')) {
         this.currentAdmin = {
-          username: 'admin',
-          name: 'Carlos Mendoza (Administrador)',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          username: username,
+          name: username === 'admindos' ? 'Andrés Morales (Administrador)' : 'Carlos Mendoza (Administrador)',
+          avatar: username === 'admindos' ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
           token: 'token-admin-cartagena-2026'
         };
         this.saveLocal('openthedoor_admin', this.currentAdmin);
         this.emit('adminAuthSuccess', this.currentAdmin);
         this.emit('adminDataUpdated', this.adminData);
       } else {
-        this.emit('adminAuthFailed', { message: 'Credenciales de Administrador incorrectas (Usuario: admin | Clave: admin123password).' });
+        this.emit('adminAuthFailed', { message: 'Credenciales de Administrador incorrectas. Verifica tu usuario y contraseña.' });
       }
       return;
     }
@@ -673,7 +674,7 @@ class TicketModel {
         this.saveLocal('openthedoor_staff', this.currentStaff);
         this.emit('staffAuthSuccess', found);
       } else {
-        this.emit('staffAuthFailed', { message: 'Credenciales de Staff incorrectas (Usa puerta1, puerta2 o puerta3 con clave puerta123password).' });
+        this.emit('staffAuthFailed', { message: 'Credenciales de Validador Staff incorrectas. Verifica tu usuario y contraseña.' });
       }
       return;
     }

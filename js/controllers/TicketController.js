@@ -941,6 +941,7 @@ class TicketController {
   handleOpenPortalModal(tab = 'admin') {
     const modal = document.getElementById('portal-modal');
     if (!modal) return;
+    this.clearPortalInputs();
     this.handleSwitchPortalTab(tab);
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -951,7 +952,19 @@ class TicketController {
     if (modal) {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      this.clearPortalInputs();
     }
+  }
+
+  clearPortalInputs() {
+    const uAdmin = document.getElementById('admin-user');
+    const pAdmin = document.getElementById('admin-pass');
+    const uStaff = document.getElementById('staff-user');
+    const pStaff = document.getElementById('staff-pass');
+    if (uAdmin) uAdmin.value = '';
+    if (pAdmin) pAdmin.value = '';
+    if (uStaff) uStaff.value = '';
+    if (pStaff) pStaff.value = '';
   }
 
   handleSwitchPortalTab(tab) {

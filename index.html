@@ -1549,8 +1549,8 @@
 
       <!-- Login Admin -->
       <form id="form-portal-admin" onsubmit="appController.handleAdminLoginSubmit(event)" class="space-y-3">
-        <input type="text" id="admin-user" value="admindos" placeholder="Usuario Admin" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
-        <input type="password" id="admin-pass" value="emhotelsadmin31" placeholder="Contraseña" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="text" id="admin-user" placeholder="Usuario Administrador" autocomplete="username" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-500">
+        <input type="password" id="admin-pass" placeholder="Contraseña" autocomplete="current-password" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-500">
         <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all">
           Acceder como Administrador
         </button>
@@ -1558,8 +1558,8 @@
 
       <!-- Login Staff -->
       <form id="form-portal-staff" onsubmit="appController.handleStaffLoginSubmit(event)" class="hidden space-y-3">
-        <input type="text" id="staff-user" value="puerta1" placeholder="Username Staff" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
-        <input type="password" id="staff-pass" value="puerta123password" placeholder="Contraseña Staff" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold">
+        <input type="text" id="staff-user" placeholder="Usuario Staff" autocomplete="username" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500">
+        <input type="password" id="staff-pass" placeholder="Contraseña Staff" autocomplete="current-password" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500">
         <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all">
           Acceder como Validador Staff
         </button>
