@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TicketEntry - Service Worker (Bypass Cache & Auto-Update)
+   TicketEntry - Service Worker (Bypass Cache & Auto-Update v2.1)
    ========================================================================== */
 
 self.addEventListener('install', (event) => {

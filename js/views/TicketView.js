@@ -388,25 +388,47 @@ class TicketView {
           if (typeof QRCode === 'function') {
             new QRCode(qrContainer, {
               text: payload,
-              width: 170,
-              height: 170,
-              colorDark: "#0f172a",
+              width: 190,
+              height: 190,
+              colorDark: "#000000",
               colorLight: "#ffffff",
-              correctLevel: (QRCode.CorrectLevel && QRCode.CorrectLevel.H) ? QRCode.CorrectLevel.H : 2
+              correctLevel: (QRCode.CorrectLevel && QRCode.CorrectLevel.M !== undefined) ? QRCode.CorrectLevel.M : 0
             });
+
+            // Garantizar de forma estricta que quede UN SOLO elemento QR en pantalla (evitar canvas + img juntos)
+            const enforceSingleQr = () => {
+              const canvas = qrContainer.querySelector('canvas');
+              const img = qrContainer.querySelector('img');
+              if (img && img.src && (img.src.startsWith('data:image') || img.src.startsWith('http'))) {
+                if (canvas) canvas.remove();
+                img.style.display = 'block';
+                img.style.width = '190px';
+                img.style.height = '190px';
+                img.style.margin = '0 auto';
+              } else if (canvas && (!img || !img.src)) {
+                if (img) img.remove();
+                canvas.style.display = 'block';
+                canvas.style.width = '190px';
+                canvas.style.height = '190px';
+                canvas.style.margin = '0 auto';
+              }
+            };
+            enforceSingleQr();
+            setTimeout(enforceSingleQr, 30);
+            setTimeout(enforceSingleQr, 120);
           } else {
             const img = document.createElement('img');
             img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
-            img.className = 'w-44 h-44 mx-auto object-contain block rounded-lg shadow-sm';
-            img.alt = `Código QR ${payload}`;
+            img.className = 'w-[190px] h-[190px] mx-auto object-contain block rounded-lg shadow-sm';
+            img.alt = `Código QR Oficial ${payload}`;
             qrContainer.appendChild(img);
           }
         } catch (e) {
           console.warn('Error inicializando QRCode.js, usando respaldo de imagen:', e);
           const img = document.createElement('img');
           img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
-          img.className = 'w-44 h-44 mx-auto object-contain block rounded-lg shadow-sm';
-          img.alt = `Código QR ${payload}`;
+          img.className = 'w-[190px] h-[190px] mx-auto object-contain block rounded-lg shadow-sm';
+          img.alt = `Código QR Oficial ${payload}`;
           qrContainer.appendChild(img);
         }
       };
