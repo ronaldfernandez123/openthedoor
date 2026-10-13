@@ -190,22 +190,15 @@
   max-width: 210px !important;
   max-height: 210px !important;
   margin: 0 auto !important;
-  padding: 10px !important;
+  padding: 8px !important;
   background-color: #ffffff !important;
   border-radius: 16px !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
 
-/* Ocultar canvas completamente: QRCode.js ya genera el <img> con el dataURI */
+#qr-canvas-wrapper img,
 #qr-canvas-wrapper canvas {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  visibility: hidden !important;
-}
-
-#qr-canvas-wrapper img {
   display: block !important;
   width: 190px !important;
   height: 190px !important;

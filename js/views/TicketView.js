@@ -384,10 +384,14 @@ class TicketView {
 
       const drawQr = (payload) => {
         qrContainer.innerHTML = '';
+        const token = String(payload || 'OPN-TICKET').trim();
+
+        // 1. Intentar renderizar con QRCode.js en contenedor aislado para obtener dataURL limpio
         try {
           if (typeof QRCode === 'function') {
-            new QRCode(qrContainer, {
-              text: payload,
+            const tempDiv = document.createElement('div');
+            new QRCode(tempDiv, {
+              text: token,
               width: 190,
               height: 190,
               colorDark: "#000000",
@@ -395,55 +399,57 @@ class TicketView {
               correctLevel: (QRCode.CorrectLevel && QRCode.CorrectLevel.M !== undefined) ? QRCode.CorrectLevel.M : 0
             });
 
-            // Garantizar de forma estricta que quede UN SOLO elemento QR en pantalla (evitar canvas + img juntos)
-            const enforceSingleQr = () => {
-              const canvas = qrContainer.querySelector('canvas');
-              const img = qrContainer.querySelector('img');
-              if (img && img.src && (img.src.startsWith('data:image') || img.src.startsWith('http'))) {
-                if (canvas) canvas.remove();
-                img.style.display = 'block';
-                img.style.width = '190px';
-                img.style.height = '190px';
-                img.style.margin = '0 auto';
-              } else if (canvas && (!img || !img.src)) {
-                if (img) img.remove();
-                canvas.style.display = 'block';
-                canvas.style.width = '190px';
-                canvas.style.height = '190px';
-                canvas.style.margin = '0 auto';
+            const canvas = tempDiv.querySelector('canvas');
+            if (canvas && typeof canvas.toDataURL === 'function') {
+              try {
+                const dataUrl = canvas.toDataURL("image/png");
+                if (dataUrl && dataUrl.length > 100) {
+                  const img = document.createElement('img');
+                  img.src = dataUrl;
+                  img.alt = `Código QR Oficial ${token}`;
+                  img.className = 'w-[190px] h-[190px] mx-auto object-contain block rounded-lg shadow-sm';
+                  img.style.width = '190px';
+                  img.style.height = '190px';
+                  img.style.aspectRatio = '1 / 1';
+                  qrContainer.appendChild(img);
+                  return;
+                }
+              } catch (e) {
+                console.warn('Error en toDataURL:', e);
               }
-            };
-            enforceSingleQr();
-            setTimeout(enforceSingleQr, 30);
-            setTimeout(enforceSingleQr, 120);
-          } else {
-            const img = document.createElement('img');
-            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
-            img.className = 'w-[190px] h-[190px] mx-auto object-contain block rounded-lg shadow-sm';
-            img.alt = `Código QR Oficial ${payload}`;
-            qrContainer.appendChild(img);
+            }
           }
-        } catch (e) {
-          console.warn('Error inicializando QRCode.js, usando respaldo de imagen:', e);
-          const img = document.createElement('img');
-          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
-          img.className = 'w-[190px] h-[190px] mx-auto object-contain block rounded-lg shadow-sm';
-          img.alt = `Código QR Oficial ${payload}`;
-          qrContainer.appendChild(img);
+        } catch (err) {
+          console.warn('QRCode.js falló, usando respaldo directo:', err);
         }
+
+        // 2. Respaldo directo de alta disponibilidad (Garantiza que NUNCA quede vacío)
+        const backupImg = document.createElement('img');
+        backupImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=1&data=${encodeURIComponent(token)}`;
+        backupImg.alt = `Código QR Oficial ${token}`;
+        backupImg.className = 'w-[190px] h-[190px] mx-auto object-contain block rounded-lg shadow-sm';
+        backupImg.style.width = '190px';
+        backupImg.style.height = '190px';
+        backupImg.style.aspectRatio = '1 / 1';
+        qrContainer.appendChild(backupImg);
       };
 
+      // Dibujar de forma inmediata para que NUNCA aparezca en blanco
+      const baseCode = venta.codigoCompra || venta.idPedido || 'OPN-TICKET';
       if (venta.qrToken && venta.qrToken.includes('.s.')) {
         drawQr(venta.qrToken);
-      } else if (typeof generateSignedQrToken === 'function') {
-        generateSignedQrToken(venta.codigoCompra || venta.idPedido).then(signedToken => {
-          venta.qrToken = signedToken;
-          drawQr(signedToken);
-        }).catch(() => {
-          drawQr(venta.codigoCompra || venta.idPedido || 'OPN-TICKET');
-        });
       } else {
-        drawQr(venta.codigoCompra || venta.idPedido || 'OPN-TICKET');
+        drawQr(baseCode);
+        if (typeof generateSignedQrToken === 'function') {
+          generateSignedQrToken(baseCode).then(signedToken => {
+            if (signedToken && signedToken !== baseCode) {
+              venta.qrToken = signedToken;
+              drawQr(signedToken);
+            }
+          }).catch(e => {
+            console.warn('Error generando token firmado:', e);
+          });
+        }
       }
     }
 

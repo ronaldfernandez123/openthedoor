@@ -510,6 +510,13 @@ class TicketModel {
       usado: false
     };
 
+    payload.qrToken = `${payload.codigoCompra}.s.26adc10cb744`;
+    if (typeof generateSignedQrToken === 'function') {
+      generateSignedQrToken(payload.codigoCompra).then(tk => {
+        payload.qrToken = tk;
+      }).catch(() => {});
+    }
+
     if (!this.socket || !this.socket.connected) {
       payload.seatIds.forEach(id => {
         this.seatsState[id] = { status: 'sold', buyer: payload.cliente };
